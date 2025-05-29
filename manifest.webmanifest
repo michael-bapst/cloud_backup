@@ -1,0 +1,21 @@
+{
+  "name": "Andrea Lio Michael ❤️",
+  "short_name": "ALM ❤️",
+  "description": "Lokale Verwaltung privater Medien",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f8f8f8",
+  "theme_color": "#1e87f0",
+  "icons": [
+    {
+      "src": "icons/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

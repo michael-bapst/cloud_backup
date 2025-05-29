@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud-Backup</title>
+
+  <meta name="theme-color" content="#1e87f0" />
+  <link rel="manifest" href="icons/site.webmanifest" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png" />
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/css/uikit.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js"></script>
+</head>
+
+<body>
+
+<button class="uk-button uk-button-default uk-position-top-right uk-margin-small-top uk-margin-small-right" id="logoutBtn">
+  <span uk-icon="sign-out"></span> Logout
+</button>
+
+<div class="uk-container uk-margin-small-top">
+  <h2 id="viewHeading" class="uk-heading-small uk-text-primary uk-margin-remove-top uk-margin-small-bottom">Fotos</h2>
+
+  <div class="uk-flex uk-flex-left uk-margin-small-bottom" id="viewModeToggles" style="display: none;">
+    <div class="uk-button-group">
+      <button class="uk-button uk-button-default" id="gridViewBtn"><span uk-icon="grid"></span></button>
+      <button class="uk-button uk-button-default" id="listViewBtn"><span uk-icon="list"></span></button>
+    </div>
+  </div>
+
+  <div id="backBtnContainer" class="uk-margin-small-bottom"></div>
+
+  <ul class="uk-breadcrumb" id="breadcrumb"></ul>
+
+  <div id="contentGrid" class="uk-margin-top"></div>
+</div>
+
+<div id="uploadModal" uk-modal>
+  <div class="uk-modal-dialog uk-modal-body">
+    <h2 class="uk-modal-title">Datei hochladen</h2>
+    <form id="uploadForm" class="uk-form-stacked" enctype="multipart/form-data">
+      <div class="uk-margin">
+        <div uk-form-custom="target: true">
+          <input type="file" name="file" multiple required />
+          <input class="uk-input uk-form-width-medium" type="text" placeholder="Datei auswählen" disabled />
+        </div>
+      </div>
+      <div class="uk-margin">
+        <button class="uk-button uk-button-primary" type="submit">Hochladen</button>
+      </div>
+      <progress id="uploadProgressBar" max="100" value="0" class="uk-progress" style="display: none;"></progress>
+    </form>
+  </div>
+</div>
+
+<div id="newFolderModal" uk-modal>
+  <div class="uk-modal-dialog uk-modal-body">
+    <h2 class="uk-modal-title">Neuer Ordner</h2>
+    <form class="uk-form-stacked" id="newFolderForm">
+      <div class="uk-margin">
+        <label class="uk-form-label">Ordnername</label>
+        <div class="uk-form-controls">
+          <input class="uk-input" type="text" required />
+        </div>
+      </div>
+      <div class="uk-margin">
+        <button class="uk-button uk-button-primary" type="submit">Erstellen</button>
+        <button class="uk-button uk-button-default uk-modal-close" type="button">Abbrechen</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="renameModal" uk-modal>
+  <div class="uk-modal-dialog uk-modal-body">
+    <h2 class="uk-modal-title">Ordner umbenennen</h2>
+    <form id="renameForm" class="uk-form-stacked">
+      <input type="hidden" id="renameOldName" />
+      <div class="uk-margin">
+        <label class="uk-form-label">Neuer Name</label>
+        <div class="uk-form-controls">
+          <input class="uk-input" type="text" id="renameNewName" required />
+        </div>
+      </div>
+      <div class="uk-margin">
+        <button class="uk-button uk-button-primary" type="submit">Speichern</button>
+        <button class="uk-button uk-button-default uk-modal-close" type="button">Abbrechen</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="deleteModal" uk-modal>
+  <div class="uk-modal-dialog uk-modal-body">
+    <h2 class="uk-modal-title">Ordner wirklich löschen?</h2>
+    <p id="deleteConfirmText"></p>
+    <div class="uk-margin">
+      <button class="uk-button uk-button-primary" id="confirmDeleteBtn">Löschen</button>
+      <button class="uk-button uk-button-default uk-modal-close" type="button">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<button class="uk-button uk-button-primary uk-position-fixed" style="bottom: 80px; right: 20px; z-index: 1000; display: none;" uk-toggle="target: #uploadModal" id="fabFotos">
+  <span uk-icon="plus"></span> Bild hochladen
+</button>
+
+<button class="uk-button uk-button-primary uk-position-fixed" style="bottom: 80px; right: 20px; z-index: 1000; display: none;" uk-toggle="target: #newFolderModal" id="fabAlben">
+  <span uk-icon="folder"></span> Neues Album
+</button>
+
+<button class="uk-button uk-button-primary uk-position-fixed" style="bottom: 80px; right: 20px; z-index: 1000; display: none;" uk-toggle="target: #uploadModal" id="fabDateien">
+  <span uk-icon="plus"></span> Datei hinzufügen
+</button>
+
+<div class="uk-position-fixed uk-position-bottom uk-width-1-1 uk-background-default uk-box-shadow-top" style="z-index:999;">
+  <ul class="uk-subnav uk-subnav-pill uk-flex-center uk-child-width-expand" id="viewTabs" style="padding: 10px 0; margin: 0;">
+    <li class="uk-active" data-view="fotos"><a href="#"><div class="uk-text-small">Fotos</div></a></li>
+    <li data-view="alben"><a href="#"><div class="uk-text-small">Alben</div></a></li>
+    <li data-view="dateien"><a href="#"><div class="uk-text-small">Dateien</div></a></li>
+    <li data-view="sync"><a href="#"><div class="uk-text-small">Sync</div></a></li>
+  </ul>
+
+</div>
+
+<script src="js/helpers.js"></script>
+<script src="js/folders.js"></script>
+<script src="js/media.js"></script>
+<script src="js/upload.js"></script>
+<script src="js/views.js"></script>
+<script src="js/lazy.js"></script>
+<script src="js/init.js"></script>
+
+<script>
+  const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  if (!token) {
+    window.location.href = 'index.html';
+  }
+</script>
+
+</body>
+</html>

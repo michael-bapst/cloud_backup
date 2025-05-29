@@ -1,0 +1,97 @@
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Cloud Login</title>
+
+    <meta name="theme-color" content="#1e87f0" />
+    <link rel="manifest" href="icons/site.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png" />
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js"></script>
+</head>
+
+<body>
+<div class="uk-section uk-section-small uk-flex uk-flex-middle uk-flex-center" style="min-height:100vh;">
+    <div class="uk-container uk-container-xsmall">
+        <div class="uk-card uk-card-default uk-card-body uk-width-1-1">
+            <h3 class="uk-card-title uk-text-center">Anmelden</h3>
+            <form class="uk-form-stacked" id="loginForm">
+                <div class="uk-margin">
+                    <label class="uk-form-label">Benutzername oder E-Mail</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" type="text" id="email" required autofocus />
+                    </div>
+                </div>
+                <div class="uk-margin">
+                    <label class="uk-form-label">Passwort</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" type="password" id="password" required />
+                    </div>
+                </div>
+                <div class="uk-margin uk-flex uk-flex-middle">
+                    <input class="uk-checkbox" type="checkbox" id="stayLoggedIn" />
+                    <label for="stayLoggedIn" class="uk-margin-small-left">Eingeloggt bleiben</label>
+                </div>
+                <div class="uk-margin">
+                    <button class="uk-button uk-button-primary uk-width-1-1" type="submit">Anmelden</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'https://cloud-backend-stxe.onrender.com';
+
+    function saveToken(token, stayLoggedIn) {
+        if (stayLoggedIn) localStorage.setItem('authToken', token);
+        else sessionStorage.setItem('authToken', token);
+    }
+
+    function getToken() {
+        return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    }
+
+    if (getToken()) {
+        window.location.href = 'app.html';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const stayLoggedIn = document.getElementById('stayLoggedIn').checked;
+
+        try {
+            const res = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: email, pass: password })
+            });
+
+            if (!res.ok) throw new Error('Login fehlgeschlagen');
+
+            const data = await res.json();
+            saveToken(data.token, stayLoggedIn);
+            window.location.href = 'app.html';
+        } catch (err) {
+            UIkit.notification({
+                message: err.message || 'Fehler beim Login',
+                status: 'danger',
+                timeout: 3000
+            });
+        }
+    });
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(console.error);
+    }
+</script>
+</body>
+</html>
