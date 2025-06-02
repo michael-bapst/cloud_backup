@@ -46,52 +46,8 @@
     </div>
 </div>
 
-<script>
-    const API_BASE = 'https://cloud-backend-2-ttrb.onrender.com';
+<script src="js/auth.js"></script>
+<script src="js/login.js"></script>
 
-    function saveToken(token, stayLoggedIn) {
-        if (stayLoggedIn) localStorage.setItem('authToken', token);
-        else sessionStorage.setItem('authToken', token);
-    }
-
-    function getToken() {
-        return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-    }
-
-    if (getToken()) {
-        window.location.href = 'app.html';
-    }
-
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const stayLoggedIn = document.getElementById('stayLoggedIn').checked;
-
-        try {
-            const res = await fetch(`${API_BASE}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: email, pass: password })
-            });
-
-            if (!res.ok) throw new Error('Login fehlgeschlagen');
-
-            const data = await res.json();
-            saveToken(data.token, stayLoggedIn);
-            window.location.href = 'app.html';
-        } catch (err) {
-            UIkit.notification({
-                message: err.message || 'Fehler beim Login',
-                status: 'danger',
-                timeout: 3000
-            });
-        }
-    });
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js').catch(console.error);
-    }
-</script>
 </body>
 </html>
