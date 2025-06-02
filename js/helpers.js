@@ -1,6 +1,4 @@
-// js/helpers.js
-
-const API_BASE = 'https://cloud-backend-stxe.onrender.com';
+const API_BASE = 'https://cloud-backend-2-ttrb.onrender.com';
 
 function getToken() {
     return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
