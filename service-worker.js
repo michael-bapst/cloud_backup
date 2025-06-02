@@ -15,6 +15,7 @@ const ASSETS_TO_CACHE = [
     './js/media.js',
     './js/upload.js',
     './js/views.js',
+    './js/setpassword.js',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/css/uikit.min.css',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit.min.js',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js'
