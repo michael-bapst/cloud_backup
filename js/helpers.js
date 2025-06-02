@@ -1,3 +1,5 @@
+// js/helpers.js
+
 const API_BASE = 'https://cloud-backend-stxe.onrender.com';
 
 function getToken() {

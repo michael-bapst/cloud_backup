@@ -94,7 +94,7 @@ async function init() {
     if (lastView && Array.isArray(lastPath)) {
         switchViewTo(lastView);
         currentPath = lastPath;
-        sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
+        sessionStorage.setItem('lastPath', JSON.stringify(currentPath)); // ✅ Sicherstellen, dass es gespeichert bleibt
     } else {
         switchViewTo('fotos');
         currentPath = [];

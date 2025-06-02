@@ -1,10 +1,20 @@
-const CACHE_NAME = 'media-cloud-v1';
+const CACHE_NAME = 'media-cloud-v3';
+
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './app.html',
     './css/style.css',
     './manifest.webmanifest',
+    './js/auth.js',
+    './js/folders.js',
+    './js/helpers.js',
+    './js/init.js',
+    './js/lazy.js',
+    './js/login.js',
+    './js/media.js',
+    './js/upload.js',
+    './js/views.js',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/css/uikit.min.css',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit.min.js',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js'

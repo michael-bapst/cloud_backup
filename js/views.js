@@ -72,7 +72,6 @@ function switchViewTo(view) {
     fabAlben.style.display = isInAlbumRoot ? 'block' : 'none';
     fabDateien.style.display = view === 'dateien' ? 'block' : 'none';
 
-    // Breadcrumb
     document.getElementById('breadcrumb')?.style.setProperty(
         'display',
         view === 'alben' && currentPath.length > 0 ? 'block' : 'none'
@@ -111,7 +110,7 @@ function switchViewTo(view) {
 
 function renderFotos() {
     const grid = document.getElementById('contentGrid');
-    showLoading(grid); // Ladeindikator
+    showLoading(grid);
 
     let path = currentPath.join('/');
     if (activeView === 'fotos') path = 'Home';
@@ -127,7 +126,11 @@ function renderFotos() {
     container.className = 'uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l';
     container.setAttribute('uk-grid', '');
 
-    initLazyLoad(container, fotos);
+    fotos.forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(createFileCard(item));
+        container.appendChild(wrapper);
+    });
 
     grid.innerHTML = '';
     grid.appendChild(container);
@@ -159,7 +162,7 @@ function renderDateien() {
 
 function renderContent() {
     const grid = document.getElementById('contentGrid');
-    showLoading(grid); // 🔁 Ladeanzeige (neu)
+    showLoading(grid);
 
     const container = document.createElement('div');
     container.className = 'uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l';
@@ -273,7 +276,7 @@ function renderSyncView() {
         const files = input.files;
 
         if (!files.length) {
-            UIkit.notification({ message: 'Kein Ordner ausgewählt', status: 'warning' });
+            UIkit.notification({ message: '❗ Kein Ordner ausgewählt', status: 'warning' });
             return;
         }
 
@@ -292,7 +295,7 @@ function renderSyncView() {
             });
         }
 
-        UIkit.notification({ message: 'Ordner synchronisiert', status: 'success' });
+        UIkit.notification({ message: '✅ Ordner synchronisiert', status: 'success' });
         renderSyncOverview();
     });
 

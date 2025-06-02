@@ -16,7 +16,6 @@ window.handleUpload = async function (e) {
     if (activeView === 'fotos') targetPath = '';
     if (activeView === 'dateien') targetPath = 'files';
 
-    // Fortschrittsanzeige vorbereiten
     const progressBar = document.getElementById('uploadProgressBar');
     progressBar.max = files.length;
     progressBar.value = 0;
@@ -58,7 +57,7 @@ window.handleUpload = async function (e) {
                     resolve();
                 } else {
                     UIkit.notification({ message: `Fehler bei ${file.name}`, status: 'danger' });
-                    resolve();
+                    resolve(); // nicht reject, damit Promise.all nicht abbricht
                 }
             };
 

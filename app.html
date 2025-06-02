@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  <script>
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    if (!token) {
+      window.location.href = 'index.html';
+    }
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud-Backup</title>
+  <title>Cloud Backup</title>
 
   <meta name="theme-color" content="#1e87f0" />
   <link rel="manifest" href="icons/site.webmanifest" />
@@ -24,9 +30,11 @@
   <span uk-icon="sign-out"></span> Logout
 </button>
 
+<!-- Hauptbereich -->
 <div class="uk-container uk-margin-small-top">
   <h2 id="viewHeading" class="uk-heading-small uk-text-primary uk-margin-remove-top uk-margin-small-bottom">Fotos</h2>
 
+  <!-- Ansichtsschalter -->
   <div class="uk-flex uk-flex-left uk-margin-small-bottom" id="viewModeToggles" style="display: none;">
     <div class="uk-button-group">
       <button class="uk-button uk-button-default" id="gridViewBtn"><span uk-icon="grid"></span></button>
@@ -34,13 +42,17 @@
     </div>
   </div>
 
+  <!-- Zurück-Button -->
   <div id="backBtnContainer" class="uk-margin-small-bottom"></div>
 
+  <!-- Breadcrumb -->
   <ul class="uk-breadcrumb" id="breadcrumb"></ul>
 
+  <!-- Inhalt -->
   <div id="contentGrid" class="uk-margin-top"></div>
 </div>
 
+<!-- Upload Modal -->
 <div id="uploadModal" uk-modal>
   <div class="uk-modal-dialog uk-modal-body">
     <h2 class="uk-modal-title">Datei hochladen</h2>
@@ -59,6 +71,8 @@
   </div>
 </div>
 
+
+<!-- New Folder Modal -->
 <div id="newFolderModal" uk-modal>
   <div class="uk-modal-dialog uk-modal-body">
     <h2 class="uk-modal-title">Neuer Ordner</h2>
@@ -77,6 +91,7 @@
   </div>
 </div>
 
+<!-- Rename Modal -->
 <div id="renameModal" uk-modal>
   <div class="uk-modal-dialog uk-modal-body">
     <h2 class="uk-modal-title">Ordner umbenennen</h2>
@@ -96,6 +111,7 @@
   </div>
 </div>
 
+<!-- Delete Modal -->
 <div id="deleteModal" uk-modal>
   <div class="uk-modal-dialog uk-modal-body">
     <h2 class="uk-modal-title">Ordner wirklich löschen?</h2>
@@ -107,6 +123,7 @@
   </div>
 </div>
 
+<!-- FABs -->
 <button class="uk-button uk-button-primary uk-position-fixed" style="bottom: 80px; right: 20px; z-index: 1000; display: none;" uk-toggle="target: #uploadModal" id="fabFotos">
   <span uk-icon="plus"></span> Bild hochladen
 </button>
@@ -119,6 +136,7 @@
   <span uk-icon="plus"></span> Datei hinzufügen
 </button>
 
+<!-- Bottom Navigation -->
 <div class="uk-position-fixed uk-position-bottom uk-width-1-1 uk-background-default uk-box-shadow-top" style="z-index:999;">
   <ul class="uk-subnav uk-subnav-pill uk-flex-center uk-child-width-expand" id="viewTabs" style="padding: 10px 0; margin: 0;">
     <li class="uk-active" data-view="fotos"><a href="#"><div class="uk-text-small">Fotos</div></a></li>
@@ -129,6 +147,7 @@
 
 </div>
 
+<!-- JS -->
 <script src="js/helpers.js"></script>
 <script src="js/folders.js"></script>
 <script src="js/media.js"></script>
@@ -136,13 +155,6 @@
 <script src="js/views.js"></script>
 <script src="js/lazy.js"></script>
 <script src="js/init.js"></script>
-
-<script>
-  const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-  if (!token) {
-    window.location.href = 'index.html';
-  }
-</script>
 
 </body>
 </html>
