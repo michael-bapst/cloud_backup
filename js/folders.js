@@ -8,8 +8,10 @@ function createFolderCard(f) {
     const thumbnailWrapper = document.createElement('div');
     thumbnailWrapper.className = 'album-thumbnail';
 
+    // Bild-Vorschau als Platzhalter
     thumbnailWrapper.innerHTML = `<span uk-icon="icon: image; ratio: 2" class="album-placeholder-icon"></span>`;
 
+    // Asynchron Bild nachladen (wenn nicht schon vorhanden)
     const loadPreview = async () => {
         let mediaItem = f.items?.find(i => isMediaFile(i.name));
 
@@ -31,7 +33,7 @@ function createFolderCard(f) {
                 thumbnailWrapper.innerHTML = ''; // Icon entfernen
                 thumbnailWrapper.appendChild(img);
             } catch {
-
+                // kein Bild verfügbar
             }
         }
     };
@@ -210,17 +212,15 @@ async function handleNewFolder(e) {
         return;
     }
 
-    const email = getUserEmail();
+    const token = getToken();
     const current = currentPath.join('/') === 'Home' ? '' : currentPath.join('/');
-    const fullPath = `users/${email}/${current}/${name}`.replace(/\/+/g, '/');
-    const parentPath = `users/${email}/${current || ''}`.replace(/\/+/g, '/');
+    const fullPath = current ? `${current}/${name}` : name;
+    const parentPath = current || 'Home';
 
     if (folders[fullPath]) {
         UIkit.notification({ message: 'Ordner existiert bereits', status: 'warning' });
         return;
     }
-
-    const token = getToken();
 
     const res = await fetch(`${API_BASE}/create-folder`, {
         method: 'POST',

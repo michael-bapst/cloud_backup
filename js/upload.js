@@ -1,4 +1,5 @@
-// upload.js
+const allowedImages = /\.(jpe?g|png|gif|bmp|webp)$/i;
+const allowedDocs = /\.(pdf|zip|docx?|xlsx?|txt|json)$/i;
 
 window.handleUpload = async function (e) {
     e.preventDefault();
@@ -11,15 +12,9 @@ window.handleUpload = async function (e) {
     }
 
     const token = getToken();
-    const email = getUserEmail();
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
-
-    // Dynamische Pfade basierend auf Ansicht
-    if (activeView === 'fotos') targetPath = 'media';
-    if (activeView === 'dateien') targetPath = 'docs';
-    if (activeView === 'alben') targetPath = '';
-
-    targetPath = `users/${email}/${targetPath}`.replace(/\/+/g, '/');
+    if (activeView === 'fotos') targetPath = '';
+    if (activeView === 'dateien') targetPath = 'files';
 
     const progressBar = document.getElementById('uploadProgressBar');
     progressBar.max = files.length;
@@ -29,7 +24,18 @@ window.handleUpload = async function (e) {
     let completed = 0;
 
     await Promise.all([...files].map(file => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+            // Validierung
+            if (activeView === 'fotos' && !allowedImages.test(file.name)) {
+                UIkit.notification({ message: 'Nur Bilder erlaubt', status: 'warning' });
+                return resolve();
+            }
+
+            if (activeView === 'dateien' && !allowedDocs.test(file.name)) {
+                UIkit.notification({ message: 'Nur Dokumente erlaubt', status: 'warning' });
+                return resolve();
+            }
+
             const xhr = new XMLHttpRequest();
             const formData = new FormData();
             formData.append('file', file);
@@ -38,13 +44,20 @@ window.handleUpload = async function (e) {
             xhr.open('POST', `${API_BASE}/upload`);
             xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    console.log(`Uploading ${file.name}: ${Math.round(event.loaded / event.total * 100)}%`);
+                }
+            };
+
             xhr.onload = () => {
                 completed++;
                 progressBar.value = completed;
-                if (xhr.status === 200) resolve();
-                else {
-                    UIkit.notification({ message: `Fehler bei ${file.name}`, status: 'danger' });
+                if (xhr.status === 200) {
                     resolve();
+                } else {
+                    UIkit.notification({ message: `Fehler bei ${file.name}`, status: 'danger' });
+                    resolve(); // nicht reject, damit Promise.all nicht abbricht
                 }
             };
 

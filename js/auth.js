@@ -1,36 +1,20 @@
-// auth.js
-
-const TOKEN_KEY = 'authToken';
+const API_BASE = 'https://cloud-backend-stxe.onrender.com';
 
 function saveToken(token, stayLoggedIn) {
-    (stayLoggedIn ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+    if (stayLoggedIn) localStorage.setItem('authToken', token);
+    else sessionStorage.setItem('authToken', token);
 }
 
 function getToken() {
-    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
 }
 
-function removeToken() {
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
+function isAuthenticated() {
+    return !!getToken();
 }
 
 function logout() {
-    removeToken();
+    localStorage.removeItem('authToken');
+    sessionStorage.removeItem('authToken');
     window.location.href = 'index.html';
-}
-
-function parseJwt(token) {
-    try {
-        const payload = token.split('.')[1];
-        return JSON.parse(atob(payload));
-    } catch {
-        return null;
-    }
-}
-
-function getUserEmail() {
-    const token = getToken();
-    const payload = parseJwt(token);
-    return payload?.email || null;
 }
