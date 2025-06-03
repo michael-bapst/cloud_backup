@@ -12,9 +12,11 @@ window.handleUpload = async function (e) {
     }
 
     const token = getToken();
+    const userFolder = getUserFolder();
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
     if (activeView === 'fotos') targetPath = '';
     if (activeView === 'dateien') targetPath = 'files';
+    targetPath = `${userFolder}${targetPath}`;
 
     const progressBar = document.getElementById('uploadProgressBar');
     progressBar.max = files.length;
