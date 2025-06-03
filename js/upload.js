@@ -12,7 +12,7 @@ window.handleUpload = async function (e) {
     }
 
     const token = getToken();
-    const userFolder = getUserFolder();
+    const userFolder = getUserFolder(); // z. B. users/test@example.com/
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
     if (activeView === 'fotos') targetPath = '';
     if (activeView === 'dateien') targetPath = 'files';
@@ -26,8 +26,7 @@ window.handleUpload = async function (e) {
     let completed = 0;
 
     await Promise.all([...files].map(file => {
-        return new Promise((resolve, reject) => {
-            // Validierung
+        return new Promise((resolve) => {
             if (activeView === 'fotos' && !allowedImages.test(file.name)) {
                 UIkit.notification({ message: 'Nur Bilder erlaubt', status: 'warning' });
                 return resolve();
@@ -59,7 +58,7 @@ window.handleUpload = async function (e) {
                     resolve();
                 } else {
                     UIkit.notification({ message: `Fehler bei ${file.name}`, status: 'danger' });
-                    resolve(); // nicht reject, damit Promise.all nicht abbricht
+                    resolve();
                 }
             };
 
