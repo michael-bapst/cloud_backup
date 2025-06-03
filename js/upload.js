@@ -16,7 +16,6 @@ window.handleUpload = async function (e) {
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
     if (activeView === 'fotos') targetPath = '';
     if (activeView === 'dateien') targetPath = 'files';
-    if (activeView === 'sync') targetPath = targetPath;
 
     targetPath = `users/${email}/${targetPath}`.replace(/\/+/g, '/');
 
@@ -29,16 +28,6 @@ window.handleUpload = async function (e) {
 
     await Promise.all([...files].map(file => {
         return new Promise((resolve) => {
-            if (activeView === 'fotos' && !allowedImages.test(file.name)) {
-                UIkit.notification({ message: 'Nur Bilder erlaubt', status: 'warning' });
-                return resolve();
-            }
-
-            if (activeView === 'dateien' && !allowedDocs.test(file.name)) {
-                UIkit.notification({ message: 'Nur Dokumente erlaubt', status: 'warning' });
-                return resolve();
-            }
-
             const xhr = new XMLHttpRequest();
             const formData = new FormData();
             formData.append('file', file);

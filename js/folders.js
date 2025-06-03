@@ -220,6 +220,8 @@ async function handleNewFolder(e) {
         return;
     }
 
+    const token = getToken();
+
     const res = await fetch(`${API_BASE}/create-folder`, {
         method: 'POST',
         headers: {

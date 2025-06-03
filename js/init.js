@@ -23,7 +23,7 @@ async function init() {
 
     data.forEach(entry => {
         const key = entry.Key;
-        if (!key || !key.startsWith(userPrefix)) return;
+        if (!key.startsWith(userPrefix)) return;
 
         const parts = key.split('/').filter(Boolean);
         const name = parts.at(-1);
