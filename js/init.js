@@ -1,3 +1,5 @@
+// init.js
+
 async function init() {
     const token = getToken();
     if (!token) return (window.location.href = 'index.html');
@@ -31,17 +33,17 @@ async function init() {
         const parentPath = parts.slice(0, -1).join('/') || userPrefix;
         const isFolder = key.endsWith('/');
 
-        if (isFolder) {
-            if (!folders[parentPath]) {
-                folders[parentPath] = {
-                    id: parentPath,
-                    name: parentPath.split('/').pop(),
-                    items: [],
-                    subfolders: [],
-                    parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : userPrefix
-                };
-            }
+        if (!folders[parentPath]) {
+            folders[parentPath] = {
+                id: parentPath,
+                name: parentPath.split('/').pop(),
+                items: [],
+                subfolders: [],
+                parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : userPrefix
+            };
+        }
 
+        if (isFolder) {
             folders[fullPath] = {
                 id: fullPath,
                 name,
@@ -54,16 +56,6 @@ async function init() {
                 folders[parentPath].subfolders.push(fullPath);
             }
         } else {
-            if (!folders[parentPath]) {
-                folders[parentPath] = {
-                    id: parentPath,
-                    name: parentPath.split('/').pop(),
-                    items: [],
-                    subfolders: [],
-                    parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : userPrefix
-                };
-            }
-
             folders[parentPath].items.push({
                 id: Date.now() + Math.random(),
                 name,
@@ -74,9 +66,6 @@ async function init() {
         }
     });
 
-    const lastView = sessionStorage.getItem('lastView');
-    const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
-
-    currentPath = Array.isArray(lastPath) ? lastPath : [];
-    switchViewTo(lastView || 'fotos');
+    currentPath = [];
+    switchViewTo('fotos');
 }

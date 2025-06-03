@@ -1,5 +1,4 @@
-const allowedImages = /\.(jpe?g|png|gif|bmp|webp)$/i;
-const allowedDocs = /\.(pdf|zip|docx?|xlsx?|txt|json)$/i;
+// upload.js
 
 window.handleUpload = async function (e) {
     e.preventDefault();
@@ -14,8 +13,11 @@ window.handleUpload = async function (e) {
     const token = getToken();
     const email = getUserEmail();
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
-    if (activeView === 'fotos') targetPath = '';
-    if (activeView === 'dateien') targetPath = 'files';
+
+    // Dynamische Pfade basierend auf Ansicht
+    if (activeView === 'fotos') targetPath = 'media';
+    if (activeView === 'dateien') targetPath = 'docs';
+    if (activeView === 'alben') targetPath = '';
 
     targetPath = `users/${email}/${targetPath}`.replace(/\/+/g, '/');
 

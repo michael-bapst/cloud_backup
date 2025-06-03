@@ -1,35 +1,36 @@
-const API_BASE = 'https://cloud-backend-2-ttrb.onrender.com';
+// auth.js
+
+const TOKEN_KEY = 'authToken';
 
 function saveToken(token, stayLoggedIn) {
-    if (stayLoggedIn) localStorage.setItem('authToken', token);
-    else sessionStorage.setItem('authToken', token);
+    (stayLoggedIn ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
 }
 
 function getToken() {
-    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
 }
 
-function isAuthenticated() {
-    return !!getToken();
+function removeToken() {
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
 }
 
 function logout() {
-    localStorage.removeItem('authToken');
-    sessionStorage.removeItem('authToken');
+    removeToken();
     window.location.href = 'index.html';
 }
+
 function parseJwt(token) {
-    const payload = token.split('.')[1];
-    return JSON.parse(atob(payload));
+    try {
+        const payload = token.split('.')[1];
+        return JSON.parse(atob(payload));
+    } catch {
+        return null;
+    }
 }
 
 function getUserEmail() {
     const token = getToken();
-    if (!token) return null;
-    try {
-        const payload = parseJwt(token);
-        return payload.email;
-    } catch {
-        return null;
-    }
+    const payload = parseJwt(token);
+    return payload?.email || null;
 }
