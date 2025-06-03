@@ -34,8 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err?.error || 'Unbekannter Fehler');
+                const text = await res.text(); // Sicherstellen, dass auch non-JSON lesbar ist
+                let errorMessage = 'Unbekannter Fehler';
+                try {
+                    const json = JSON.parse(text);
+                    if (json?.error) errorMessage = json.error;
+                } catch {
+                    errorMessage = text;
+                }
+                throw new Error(errorMessage);
             }
 
             form.style.display = 'none';
