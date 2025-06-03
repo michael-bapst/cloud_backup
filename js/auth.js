@@ -18,3 +18,18 @@ function logout() {
     sessionStorage.removeItem('authToken');
     window.location.href = 'index.html';
 }
+function parseJwt(token) {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
+}
+
+function getUserEmail() {
+    const token = getToken();
+    if (!token) return null;
+    try {
+        const payload = parseJwt(token);
+        return payload.email;
+    } catch {
+        return null;
+    }
+}

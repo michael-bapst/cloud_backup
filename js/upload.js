@@ -12,9 +12,13 @@ window.handleUpload = async function (e) {
     }
 
     const token = getToken();
+    const email = getUserEmail();
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
     if (activeView === 'fotos') targetPath = '';
     if (activeView === 'dateien') targetPath = 'files';
+    if (activeView === 'sync') targetPath = targetPath;
+
+    targetPath = `users/${email}/${targetPath}`.replace(/\/+/g, '/');
 
     const progressBar = document.getElementById('uploadProgressBar');
     progressBar.max = files.length;
@@ -24,8 +28,7 @@ window.handleUpload = async function (e) {
     let completed = 0;
 
     await Promise.all([...files].map(file => {
-        return new Promise((resolve, reject) => {
-            // Validierung
+        return new Promise((resolve) => {
             if (activeView === 'fotos' && !allowedImages.test(file.name)) {
                 UIkit.notification({ message: 'Nur Bilder erlaubt', status: 'warning' });
                 return resolve();
@@ -44,20 +47,13 @@ window.handleUpload = async function (e) {
             xhr.open('POST', `${API_BASE}/upload`);
             xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    console.log(`Uploading ${file.name}: ${Math.round(event.loaded / event.total * 100)}%`);
-                }
-            };
-
             xhr.onload = () => {
                 completed++;
                 progressBar.value = completed;
-                if (xhr.status === 200) {
-                    resolve();
-                } else {
+                if (xhr.status === 200) resolve();
+                else {
                     UIkit.notification({ message: `Fehler bei ${file.name}`, status: 'danger' });
-                    resolve(); // nicht reject, damit Promise.all nicht abbricht
+                    resolve();
                 }
             };
 
