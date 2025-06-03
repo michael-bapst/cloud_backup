@@ -1,3 +1,5 @@
+const API_BASE = "https://cloud-backend-2-ttrb.onrender.com";
+
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
