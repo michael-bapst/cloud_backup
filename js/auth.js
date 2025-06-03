@@ -1,5 +1,3 @@
-const API_BASE = 'https://cloud-backend-stxe.onrender.com';
-
 function saveToken(token, stayLoggedIn) {
     try {
         if (stayLoggedIn) {
