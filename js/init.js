@@ -1,6 +1,6 @@
 async function init() {
     const token = getToken();
-    const userFolder = getUserFolder();
+    const userFolder = getUserFolder()?.replace(/\/$/, '');
     if (!token || !userFolder) return (window.location.href = 'index.html');
 
     const res = await fetch(`${API_BASE}/list-full`, {
@@ -14,35 +14,42 @@ async function init() {
 
     const data = await res.json();
 
-    folders = {};
+    folders = {
+        fotos: { id: 'fotos', name: 'Fotos', parent: null, items: [], subfolders: [] },
+        alben: { id: 'alben', name: 'Alben', parent: null, items: [], subfolders: [] },
+        dateien: { id: 'dateien', name: 'Dateien', parent: null, items: [], subfolders: [] },
+        sync: { id: 'sync', name: 'Sync', parent: null, items: [], subfolders: [] }
+    };
 
     data.forEach(entry => {
         const key = entry.Key;
         if (!key || !key.startsWith(userFolder)) return;
 
+        const relKey = key.replace(userFolder + '/', '');
         const isFolder = key.endsWith('/');
-        const relative = key.slice(userFolder.length); // z.B. "fotos/bild1.jpg"
-        const parts = relative.split('/').filter(Boolean);
-
-        if (parts.length === 0) return;
-
+        const parts = relKey.split('/').filter(Boolean);
         const name = parts.at(-1);
         const fullPath = parts.join('/');
-        const parentPath = parts.slice(0, -1).join('/') || null;
+        const parentPath = parts.slice(0, -1).join('/');
+
+        const top = parts[0];
+        if (!folders[top]) {
+            folders[top] = { id: top, name: top, items: [], subfolders: [], parent: null };
+        }
 
         if (isFolder) {
             for (let i = 1; i <= parts.length; i++) {
                 const segPath = parts.slice(0, i).join('/');
-                const parent = parts.slice(0, i - 1).join('/') || null;
+                const parent = parts.slice(0, i - 1).join('/') || top;
                 const segName = parts[i - 1];
 
                 if (!folders[parent]) {
                     folders[parent] = {
                         id: parent,
-                        name: parent?.split('/').pop() || '',
+                        name: segName,
                         items: [],
                         subfolders: [],
-                        parent: parent?.includes('/') ? parent.split('/').slice(0, -1).join('/') : null
+                        parent: parent.includes('/') ? parent.split('/').slice(0, -1).join('/') : top
                     };
                 }
 
@@ -56,7 +63,7 @@ async function init() {
                     };
                 }
 
-                if (!folders[parent].subfolders.includes(segPath) && segPath !== parent) {
+                if (!folders[parent].subfolders.includes(segPath)) {
                     folders[parent].subfolders.push(segPath);
                 }
             }
@@ -67,7 +74,7 @@ async function init() {
                     name: parentPath.split('/').pop(),
                     items: [],
                     subfolders: [],
-                    parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : null
+                    parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : top
                 };
             }
 
@@ -81,7 +88,6 @@ async function init() {
         }
     });
 
-    const basePath = userFolder.split('/').filter(Boolean);
     const lastView = sessionStorage.getItem('lastView');
     const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
 

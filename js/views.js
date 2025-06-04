@@ -116,17 +116,11 @@ function renderFotos() {
     showLoading(grid);
 
     let path = currentPath.join('/');
-    if (activeView === 'fotos' && path === '') {
-        path = 'Home';
-    }
+    if (path === '') path = 'fotos';
 
     if (!folders[path]) {
-        const grid = document.getElementById('contentGrid');
-        grid.innerHTML = `
-        <div class="uk-alert uk-alert-warning" uk-alert>
-            <p>Der Ordner „${path}“ ist leer oder nicht vorhanden.</p>
-        </div>
-    `;
+        UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
+        console.warn('Verfügbare folders:', Object.keys(folders));
         return;
     }
 
@@ -152,17 +146,19 @@ function renderDateien() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    if (!folders['files']) {
-        const grid = document.getElementById('contentGrid');
+    const path = 'dateien';
+
+    if (!folders[path]) {
+        UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
         grid.innerHTML = `
-        <div class="uk-alert uk-alert-warning" uk-alert>
-            <p>Keine Dateien vorhanden.</p>
-        </div>
-    `;
+            <div class="uk-alert uk-alert-warning" uk-alert>
+                <p>Keine Dateien vorhanden.</p>
+            </div>
+        `;
         return;
     }
 
-    const data = folders['files'];
+    const data = folders[path];
     const files = data.items.filter(i => !isMediaFile(i.name));
     files.sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -185,22 +181,22 @@ function renderContent() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const container = document.createElement('div');
-    container.className = 'uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l';
-    container.setAttribute('uk-grid', '');
-
-    const fullCurrentPath = currentPath.length === 0 ? 'Home' : currentPath.join('/');
+    const fullCurrentPath = currentPath.length === 0 ? 'alben' : currentPath.join('/');
     const data = folders[fullCurrentPath];
 
     if (!data) {
-        const grid = document.getElementById('contentGrid');
+        UIkit.notification({ message: `Pfad "${fullCurrentPath}" nicht gefunden`, status: 'danger' });
         grid.innerHTML = `
-        <div class="uk-alert uk-alert-warning" uk-alert>
-            <p>Kein Inhalt für „${fullCurrentPath}“ gefunden.</p>
-        </div>
-    `;
+            <div class="uk-alert uk-alert-warning" uk-alert>
+                <p>Kein Inhalt für „${fullCurrentPath}“ gefunden.</p>
+            </div>
+        `;
         return;
     }
+
+    const container = document.createElement('div');
+    container.className = 'uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l';
+    container.setAttribute('uk-grid', '');
 
     const backBtnContainer = document.getElementById('backBtnContainer');
     backBtnContainer.innerHTML = '';
