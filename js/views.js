@@ -113,7 +113,10 @@ function renderFotos() {
     showLoading(grid);
 
     let path = currentPath.join('/');
-    if (activeView === 'fotos') path = 'Home';
+    if (activeView === 'fotos' && path === '') {
+        path = getUserFolder().replace(/\/$/, '');
+    }
+
     if (!folders[path]) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
         return;

@@ -1,14 +1,6 @@
-let folders = {
-    'Home': { id: 'Home', name: 'Home', parent: null, items: [], subfolders: [] }
-};
-
-let currentPath = [];
-
-document.addEventListener('DOMContentLoaded', init);
-
 async function init() {
     const token = getToken();
-    const userFolder = getUserFolder(); // z. B. users/test@example.com/
+    const userFolder = getUserFolder();
     if (!token || !userFolder) return (window.location.href = 'index.html');
 
     const res = await fetch(`${API_BASE}/list-full`, {

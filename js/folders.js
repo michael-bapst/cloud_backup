@@ -213,14 +213,15 @@ async function handleNewFolder(e) {
     }
 
     const token = getToken();
+    const userFolder = getUserFolder()?.replace(/\/$/, '');
     const current = currentPath.join('/') === 'Home' ? '' : currentPath.join('/');
-    const fullPath = current ? `${current}/${name}` : name;
-    const parentPath = current || 'Home';
 
-    if (folders[fullPath]) {
-        UIkit.notification({ message: 'Ordner existiert bereits', status: 'warning' });
+    if (!current.startsWith(userFolder)) {
+        UIkit.notification({ message: 'Kein gültiger Zielpfad', status: 'danger' });
         return;
     }
+
+    const fullPath = current ? `${current}/${name}` : name;
 
     const res = await fetch(`${API_BASE}/create-folder`, {
         method: 'POST',
