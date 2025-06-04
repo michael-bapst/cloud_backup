@@ -221,8 +221,8 @@ async function handleNewFolder(e) {
         return;
     }
 
-    const fullPath = current ? `${current}/${name}` : name;
-    const parentPath = current || 'Home';
+    const fullPath = current ? `${userFolder}${current}/${name}` : `${userFolder}${name}`;
+    const parentPath = current ? `${userFolder}${current}` : userFolder;
 
     const res = await fetch(`${API_BASE}/create-folder`, {
         method: 'POST',

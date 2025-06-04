@@ -79,6 +79,11 @@ async function init() {
         }
     });
 
+    const baseKey = userFolder.replace(/\/$/, '');
+    if (!folders['Home'] && folders[baseKey]) {
+        folders['Home'] = folders[baseKey];
+    }
+
     const basePath = userFolder.split('/').filter(Boolean);
     const lastView = sessionStorage.getItem('lastView');
     const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');

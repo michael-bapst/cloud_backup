@@ -18,14 +18,14 @@ window.handleUpload = async function (e) {
         return;
     }
 
-    let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
-    if (activeView === 'fotos') {
-        targetPath = currentPath.length === 0 ? 'Home' : targetPath;
+    let relativePath = currentPath.join('/');
+    if (activeView === 'fotos' && relativePath === '') {
+        relativePath = 'Home';
     }
     if (activeView === 'dateien') {
-        targetPath = 'files';
+        relativePath = 'files';
     }
-    targetPath = `${userFolder}${targetPath}`;
+    const targetPath = `${userFolder}${relativePath}`;
 
     const progressBar = document.getElementById('uploadProgressBar');
     progressBar.max = files.length;

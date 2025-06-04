@@ -1,3 +1,6 @@
+window.currentPath = window.currentPath || [];
+window.folders = window.folders || {};
+
 let activeView = 'fotos';
 let viewMode = 'grid';
 
