@@ -1,23 +1,30 @@
 async function init() {
     const token = getToken();
     const userFolder = getUserFolder()?.replace(/\/$/, '');
-    if (!token || !userFolder) return (window.location.href = 'index.html');
+    if (!token || !userFolder) {
+        window.location.href = 'index.html';
+        return;
+    }
 
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         const res = await fetch(`${API_BASE}/list-full`, {
             headers: { Authorization: `Bearer ${token}` },
             signal: controller.signal
         });
 
-        clearTimeout(timeout);
+        clearTimeout(timeoutId);
 
-        if (!res.ok) throw new Error(`Fehler: ${res.status}`);
+        if (!res.ok) {
+            throw new Error(`Serverfehler: ${res.status} ${res.statusText}`);
+        }
 
-        const contentType = res.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) throw new Error("Antwort ist kein JSON");
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Unerwarteter Inhaltstyp: " + contentType);
+        }
 
         const data = await res.json();
 
