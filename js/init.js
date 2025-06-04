@@ -25,7 +25,7 @@ async function init() {
         const key = entry.Key;
         if (!key || !key.startsWith(userFolder)) return;
 
-        const relKey = key.replace(userFolder + '/', '');
+        const relKey = key.startsWith(userFolder) ? key.substring(userFolder.length) : key;
         const isFolder = key.endsWith('/');
         const parts = relKey.split('/').filter(Boolean);
         const name = parts.at(-1);

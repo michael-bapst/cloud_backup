@@ -8,14 +8,11 @@ function createFolderCard(f) {
     const thumbnailWrapper = document.createElement('div');
     thumbnailWrapper.className = 'album-thumbnail';
 
-    // Bild-Vorschau als Platzhalter
     thumbnailWrapper.innerHTML = `<span uk-icon="icon: image; ratio: 2" class="album-placeholder-icon"></span>`;
 
-    // Asynchron Bild nachladen (wenn nicht schon vorhanden)
     const loadPreview = async () => {
         let mediaItem = f.items?.find(i => isMediaFile(i.name));
 
-        // Wenn leer: Ordnerinhalt durchsuchen
         if (!mediaItem && folders[f.id]?.items?.length) {
             mediaItem = folders[f.id].items.find(i => isMediaFile(i.name));
         }
@@ -30,7 +27,7 @@ function createFolderCard(f) {
             try {
                 const url = await getSignedFileUrl(mediaItem.key);
                 img.src = url;
-                thumbnailWrapper.innerHTML = ''; // Icon entfernen
+                thumbnailWrapper.innerHTML = '';
                 thumbnailWrapper.appendChild(img);
             } catch {
                 // kein Bild verfügbar
