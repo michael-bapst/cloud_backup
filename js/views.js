@@ -121,7 +121,12 @@ function renderFotos() {
     }
 
     if (!folders[path]) {
-        UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
+        const grid = document.getElementById('contentGrid');
+        grid.innerHTML = `
+        <div class="uk-alert uk-alert-warning" uk-alert>
+            <p>Der Ordner „${path}“ ist leer oder nicht vorhanden.</p>
+        </div>
+    `;
         return;
     }
 
@@ -147,7 +152,17 @@ function renderDateien() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const data = folders['files'] || { items: [] };
+    if (!folders['files']) {
+        const grid = document.getElementById('contentGrid');
+        grid.innerHTML = `
+        <div class="uk-alert uk-alert-warning" uk-alert>
+            <p>Keine Dateien vorhanden.</p>
+        </div>
+    `;
+        return;
+    }
+
+    const data = folders['files'];
     const files = data.items.filter(i => !isMediaFile(i.name));
     files.sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -178,7 +193,12 @@ function renderContent() {
     const data = folders[fullCurrentPath];
 
     if (!data) {
-        UIkit.notification({ message: `Pfad "${fullCurrentPath}" nicht gefunden`, status: 'danger' });
+        const grid = document.getElementById('contentGrid');
+        grid.innerHTML = `
+        <div class="uk-alert uk-alert-warning" uk-alert>
+            <p>Kein Inhalt für „${fullCurrentPath}“ gefunden.</p>
+        </div>
+    `;
         return;
     }
 
@@ -282,7 +302,7 @@ function renderSyncView() {
         const files = input.files;
 
         if (!files.length) {
-            UIkit.notification({ message: '❗ Kein Ordner ausgewählt', status: 'warning' });
+            UIkit.notification({ message: 'Kein Ordner ausgewählt', status: 'warning' });
             return;
         }
 
@@ -301,7 +321,7 @@ function renderSyncView() {
             });
         }
 
-        UIkit.notification({ message: '✅ Ordner synchronisiert', status: 'success' });
+        UIkit.notification({ message: 'Ordner synchronisiert', status: 'success' });
         renderSyncOverview();
     });
 

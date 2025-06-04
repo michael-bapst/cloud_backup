@@ -14,33 +14,35 @@ async function init() {
 
     const data = await res.json();
 
-    folders = {
-        'Home': { id: 'Home', name: 'Home', parent: null, items: [], subfolders: [] }
-    };
+    folders = {};
 
     data.forEach(entry => {
         const key = entry.Key;
         if (!key || !key.startsWith(userFolder)) return;
 
         const isFolder = key.endsWith('/');
-        const parts = key.split('/').filter(Boolean);
+        const relative = key.slice(userFolder.length); // z.B. "fotos/bild1.jpg"
+        const parts = relative.split('/').filter(Boolean);
+
+        if (parts.length === 0) return;
+
         const name = parts.at(-1);
         const fullPath = parts.join('/');
-        const parentPath = parts.slice(0, -1).join('/') || 'Home';
+        const parentPath = parts.slice(0, -1).join('/') || null;
 
         if (isFolder) {
             for (let i = 1; i <= parts.length; i++) {
                 const segPath = parts.slice(0, i).join('/');
-                const parent = parts.slice(0, i - 1).join('/') || 'Home';
+                const parent = parts.slice(0, i - 1).join('/') || null;
                 const segName = parts[i - 1];
 
                 if (!folders[parent]) {
                     folders[parent] = {
                         id: parent,
-                        name: segName,
+                        name: parent?.split('/').pop() || '',
                         items: [],
                         subfolders: [],
-                        parent: parent.includes('/') ? parent.split('/').slice(0, -1).join('/') : 'Home'
+                        parent: parent?.includes('/') ? parent.split('/').slice(0, -1).join('/') : null
                     };
                 }
 
@@ -65,7 +67,7 @@ async function init() {
                     name: parentPath.split('/').pop(),
                     items: [],
                     subfolders: [],
-                    parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : 'Home'
+                    parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : null
                 };
             }
 
@@ -79,20 +81,15 @@ async function init() {
         }
     });
 
-    const baseKey = userFolder.replace(/\/$/, '');
-    if (!folders['Home'] && folders[baseKey]) {
-        folders['Home'] = folders[baseKey];
-    }
-
     const basePath = userFolder.split('/').filter(Boolean);
     const lastView = sessionStorage.getItem('lastView');
     const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
 
-    if (lastView && Array.isArray(lastPath) && lastPath.join('/').startsWith(userFolder)) {
+    if (lastView && Array.isArray(lastPath)) {
         currentPath = lastPath;
         switchViewTo(lastView);
     } else {
-        currentPath = basePath;
+        currentPath = [];
         switchViewTo('fotos');
     }
 
