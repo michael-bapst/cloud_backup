@@ -15,7 +15,7 @@ async function init() {
     const data = await res.json();
 
     folders = {
-        'Home': { id: 'Home', name: 'Home', items: [], subfolders: [], parent: null }
+        'Home': { id: 'Home', name: 'Home', parent: null, items: [], subfolders: [] }
     };
 
     data.forEach(entry => {
@@ -58,9 +58,7 @@ async function init() {
                     folders[parent].subfolders.push(segPath);
                 }
             }
-        }
-
-        if (!isFolder) {
+        } else {
             if (!folders[parentPath]) {
                 folders[parentPath] = {
                     id: parentPath,
@@ -81,17 +79,17 @@ async function init() {
         }
     });
 
+    const basePath = userFolder.split('/').filter(Boolean);
     const lastView = sessionStorage.getItem('lastView');
     const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
 
     if (lastView && Array.isArray(lastPath) && lastPath.join('/').startsWith(userFolder)) {
-        switchViewTo(lastView);
         currentPath = lastPath;
-        sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
+        switchViewTo(lastView);
     } else {
-        const basePath = userFolder.split('/').filter(Boolean);
-        switchViewTo('fotos');
         currentPath = basePath;
-        sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
+        switchViewTo('fotos');
     }
+
+    sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
 }
