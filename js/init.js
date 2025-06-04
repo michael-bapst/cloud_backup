@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
     const token = getToken();
-    if (!token) return (window.location.href = 'index.html');
+    const userFolder = getUserFolder(); // z. B. users/test@example.com/
+    if (!token || !userFolder) return (window.location.href = 'index.html');
 
     const res = await fetch(`${API_BASE}/list-full`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -27,7 +28,7 @@ async function init() {
 
     data.forEach(entry => {
         const key = entry.Key;
-        if (!key) return;
+        if (!key || !key.startsWith(userFolder)) return;
 
         const isFolder = key.endsWith('/');
         const parts = key.split('/').filter(Boolean);
@@ -35,7 +36,7 @@ async function init() {
         const fullPath = parts.join('/');
         const parentPath = parts.slice(0, -1).join('/') || 'Home';
 
-        if (isFolder && key.endsWith('/')) {
+        if (isFolder) {
             for (let i = 1; i <= parts.length; i++) {
                 const segPath = parts.slice(0, i).join('/');
                 const parent = parts.slice(0, i - 1).join('/') || 'Home';
@@ -67,7 +68,7 @@ async function init() {
             }
         }
 
-        if (!isFolder && !key.endsWith('/')) {
+        if (!isFolder) {
             if (!folders[parentPath]) {
                 folders[parentPath] = {
                     id: parentPath,
@@ -91,13 +92,14 @@ async function init() {
     const lastView = sessionStorage.getItem('lastView');
     const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
 
-    if (lastView && Array.isArray(lastPath)) {
+    if (lastView && Array.isArray(lastPath) && lastPath.join('/').startsWith(userFolder)) {
         switchViewTo(lastView);
         currentPath = lastPath;
         sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
     } else {
+        const basePath = userFolder.split('/').filter(Boolean);
         switchViewTo('fotos');
-        currentPath = [];
+        currentPath = basePath;
         sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
     }
 }

@@ -12,7 +12,12 @@ window.handleUpload = async function (e) {
     }
 
     const token = getToken();
-    const userFolder = getUserFolder(); // z. B. users/test@example.com/
+    const userFolder = getUserFolder();
+    if (!token || !userFolder) {
+        UIkit.notification({ message: 'Benutzerdaten fehlen', status: 'danger' });
+        return;
+    }
+
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
     if (activeView === 'fotos') targetPath = '';
     if (activeView === 'dateien') targetPath = 'files';
