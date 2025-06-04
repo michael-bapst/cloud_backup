@@ -216,7 +216,7 @@ async function handleNewFolder(e) {
     const userFolder = getUserFolder()?.replace(/\/$/, '');
     const current = currentPath.join('/') === 'Home' ? '' : currentPath.join('/');
 
-    if (!current.startsWith(userFolder)) {
+    if (current !== '' && !current.startsWith(userFolder)) {
         UIkit.notification({ message: 'Kein gültiger Zielpfad', status: 'danger' });
         return;
     }

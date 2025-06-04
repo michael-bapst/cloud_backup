@@ -114,7 +114,7 @@ function renderFotos() {
 
     let path = currentPath.join('/');
     if (activeView === 'fotos' && path === '') {
-        path = getUserFolder().replace(/\/$/, '');
+        path = 'Home';
     }
 
     if (!folders[path]) {

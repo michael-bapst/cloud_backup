@@ -19,8 +19,12 @@ window.handleUpload = async function (e) {
     }
 
     let targetPath = currentPath.length === 0 ? '' : currentPath.join('/');
-    if (activeView === 'fotos') targetPath = '';
-    if (activeView === 'dateien') targetPath = 'files';
+    if (activeView === 'fotos') {
+        targetPath = currentPath.length === 0 ? 'Home' : targetPath;
+    }
+    if (activeView === 'dateien') {
+        targetPath = 'files';
+    }
     targetPath = `${userFolder}${targetPath}`;
 
     const progressBar = document.getElementById('uploadProgressBar');
