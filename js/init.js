@@ -3,117 +3,132 @@ async function init() {
     const userFolder = getUserFolder()?.replace(/\/$/, '');
     if (!token || !userFolder) return (window.location.href = 'index.html');
 
-    const res = await fetch(`${API_BASE}/list-full`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
 
-    if (!res.ok) {
-        UIkit.notification({ message: 'Ordnerstruktur konnte nicht geladen werden', status: 'danger' });
-        return;
-    }
+        const res = await fetch(`${API_BASE}/list-full`, {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal
+        });
 
-    const data = await res.json();
+        clearTimeout(timeout);
 
-    folders = {
-        fotos: { id: 'fotos', name: 'Fotos', parent: null, items: [], subfolders: [] },
-        alben: { id: 'alben', name: 'Alben', parent: null, items: [], subfolders: [] },
-        dateien: { id: 'dateien', name: 'Dateien', parent: null, items: [], subfolders: [] },
-        sync: { id: 'sync', name: 'Sync', parent: null, items: [], subfolders: [] }
-    };
+        if (!res.ok) throw new Error(`Fehler: ${res.status}`);
 
-    data.forEach(entry => {
-        const key = entry.Key;
-        if (!key || !key.startsWith(userFolder)) return;
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) throw new Error("Antwort ist kein JSON");
 
-        const relKey = key.startsWith(userFolder) ? key.substring(userFolder.length) : key;
-        const isFolder = key.endsWith('/');
-        const parts = relKey.split('/').filter(Boolean);
-        const name = parts.at(-1);
-        const fullPath = parts.join('/');
-        const parentPath = parts.slice(0, -1).join('/');
+        const data = await res.json();
 
-        const top = parts[0];
-        if (!folders[top]) {
-            folders[top] = { id: top, name: top, items: [], subfolders: [], parent: null };
-        }
+        folders = {
+            fotos: { id: 'fotos', name: 'Fotos', parent: null, items: [], subfolders: [] },
+            alben: { id: 'alben', name: 'Alben', parent: null, items: [], subfolders: [] },
+            dateien: { id: 'dateien', name: 'Dateien', parent: null, items: [], subfolders: [] },
+            sync: { id: 'sync', name: 'Sync', parent: null, items: [], subfolders: [] }
+        };
 
-        if (isFolder) {
-            for (let i = 1; i <= parts.length; i++) {
-                const segPath = parts.slice(0, i).join('/');
-                const parent = parts.slice(0, i - 1).join('/') || top;
-                const segName = parts[i - 1];
+        data.forEach(entry => {
+            const key = entry.Key;
+            if (!key || !key.startsWith(userFolder + "/")) return;
 
-                if (!folders[parent]) {
-                    folders[parent] = {
-                        id: parent,
-                        name: segName,
-                        items: [],
-                        subfolders: [],
-                        parent: parent.includes('/') ? parent.split('/').slice(0, -1).join('/') : top
-                    };
-                }
+            const relKey = key.slice(userFolder.length);
+            const parts = relKey.split("/").filter(Boolean);
+            if (parts.length === 0) return;
 
-                if (!folders[segPath]) {
-                    folders[segPath] = {
-                        id: segPath,
-                        name: segName,
-                        items: [],
-                        subfolders: [],
-                        parent
-                    };
-                }
+            const isFolder = key.endsWith("/");
+            const name = parts.at(-1);
+            const fullPath = parts.join("/");
+            const parentPath = parts.slice(0, -1).join("/") || parts[0];
 
-                if (!folders[parent].subfolders.includes(segPath)) {
-                    folders[parent].subfolders.push(segPath);
-                }
+            const top = parts[0];
+            if (!folders[top]) {
+                folders[top] = { id: top, name: top, parent: null, items: [], subfolders: [] };
             }
+
+            if (isFolder) {
+                for (let i = 1; i <= parts.length; i++) {
+                    const segPath = parts.slice(0, i).join("/");
+                    const parent = parts.slice(0, i - 1).join("/") || top;
+                    const segName = parts[i - 1];
+
+                    if (!folders[parent]) {
+                        folders[parent] = {
+                            id: parent,
+                            name: segName,
+                            items: [],
+                            subfolders: [],
+                            parent: parent.includes("/") ? parent.split("/").slice(0, -1).join("/") : top
+                        };
+                    }
+
+                    if (!folders[segPath]) {
+                        folders[segPath] = {
+                            id: segPath,
+                            name: segName,
+                            items: [],
+                            subfolders: [],
+                            parent
+                        };
+                    }
+
+                    if (!folders[parent].subfolders.includes(segPath)) {
+                        folders[parent].subfolders.push(segPath);
+                    }
+                }
+            } else {
+                if (!folders[parentPath]) {
+                    folders[parentPath] = {
+                        id: parentPath,
+                        name: parentPath.split("/").pop(),
+                        items: [],
+                        subfolders: [],
+                        parent: parentPath.includes("/") ? parentPath.split("/").slice(0, -1).join("/") : top
+                    };
+                }
+
+                folders[parentPath].items.push({
+                    id: Date.now() + Math.random(),
+                    name,
+                    key,
+                    size: formatFileSize(entry.Size || 0),
+                    date: entry.LastModified?.split("T")[0] || ""
+                });
+            }
+        });
+
+        const lastView = sessionStorage.getItem('lastView');
+        const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
+
+        if (lastView && Array.isArray(lastPath)) {
+            currentPath = lastPath;
+            switchViewTo(lastView);
         } else {
-            if (!folders[parentPath]) {
-                folders[parentPath] = {
-                    id: parentPath,
-                    name: parentPath.split('/').pop(),
-                    items: [],
-                    subfolders: [],
-                    parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : top
-                };
-            }
-
-            folders[parentPath].items.push({
-                id: Date.now() + Math.random(),
-                name,
-                key,
-                size: formatFileSize(entry.Size || 0),
-                date: entry.LastModified?.split('T')[0] || ''
-            });
-        }
-    });
-
-    function getUserFolder() {
-        const token = getToken();
-        if (!token) return null;
-
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const email = payload.email?.toLowerCase();
-            if (email) return `users/${email}/`;
-        } catch (e) {
-            console.warn('Token-Fehler:', e.message);
-            return null;
+            currentPath = [];
+            switchViewTo('fotos');
         }
 
-        return null;
+        sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
+
+    } catch (error) {
+        console.error("init()-Fehler:", error);
+        const msg = error.name === "AbortError"
+            ? "Verbindung zu langsam oder keine Antwort vom Server"
+            : error.message;
+        UIkit.notification({ message: msg, status: 'danger' });
     }
+}
 
-    const lastView = sessionStorage.getItem('lastView');
-    const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
+function getUserFolder() {
+    const token = getToken();
+    if (!token) return null;
 
-    if (lastView && Array.isArray(lastPath)) {
-        currentPath = lastPath;
-        switchViewTo(lastView);
-    } else {
-        currentPath = [];
-        switchViewTo('fotos');
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const email = payload.email?.toLowerCase();
+        if (email) return `users/${email}/`;
+    } catch (e) {
+        console.warn("Token-Problem:", e);
     }
-
-    sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
+    return null;
 }
