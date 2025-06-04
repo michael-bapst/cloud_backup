@@ -88,6 +88,22 @@ async function init() {
         }
     });
 
+    function getUserFolder() {
+        const token = getToken();
+        if (!token) return null;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const email = payload.email?.toLowerCase();
+            if (email) return `users/${email}/`;
+        } catch (e) {
+            console.warn('Token-Fehler:', e.message);
+            return null;
+        }
+
+        return null;
+    }
+
     const lastView = sessionStorage.getItem('lastView');
     const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
 
