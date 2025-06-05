@@ -43,13 +43,13 @@ function switchViewTo(view) {
 
     if (view !== activeView) {
         if (view === 'fotos') {
-            currentPath = [`${userFolder}/fotos`];
+            currentPath = [userFolder, 'fotos'];
         } else if (view === 'alben') {
-            currentPath = [`${userFolder}/alben`];
+            currentPath = [userFolder, 'alben'];
         } else if (view === 'dateien') {
-            currentPath = [`${userFolder}/dateien`];
+            currentPath = [userFolder, 'dateien'];
         } else if (view === 'sync') {
-            currentPath = [`${userFolder}/sync`];
+            currentPath = [userFolder, 'sync'];
         } else {
             currentPath = [];
         }
@@ -67,8 +67,8 @@ function switchViewTo(view) {
     const fabAlben = document.getElementById('fabAlben');
     const fabDateien = document.getElementById('fabDateien');
 
-    const isInAlbumRoot = view === 'alben' && currentPath.length === 1;
-    const isInAlbumFolder = view === 'alben' && currentPath.length > 1;
+    const isInAlbumRoot = view === 'alben' && currentPath.length === 2;
+    const isInAlbumFolder = view === 'alben' && currentPath.length > 2;
 
     if (heading) {
         heading.textContent =
@@ -86,7 +86,7 @@ function switchViewTo(view) {
 
     document.getElementById('breadcrumb')?.style.setProperty(
         'display',
-        view === 'alben' && currentPath.length > 1 ? 'block' : 'none'
+        view === 'alben' && currentPath.length > 2 ? 'block' : 'none'
     );
 
     sessionStorage.setItem('lastView', view);
@@ -95,7 +95,7 @@ function switchViewTo(view) {
     if (view === 'fotos') {
         renderFotos();
     } else if (view === 'alben') {
-        if (currentPath.length === 1) {
+        if (isInAlbumRoot) {
             renderContent();
         } else {
             renderFotos();
@@ -139,7 +139,7 @@ function renderDateien() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const path = `${getUserFolder()?.replace(/\/$/, '')}/dateien`;
+    const path = currentPath.join('/');
 
     if (!folders[path]) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
@@ -174,16 +174,16 @@ function renderContent() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const fullCurrentPath = currentPath.join('/');
-    const data = folders[fullCurrentPath];
+    const path = currentPath.join('/');
+    const data = folders[path];
 
     if (!data) {
-        UIkit.notification({ message: `Pfad "${fullCurrentPath}" nicht gefunden`, status: 'danger' });
+        UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
         grid.innerHTML = `
-            <div class="uk-alert uk-alert-warning" uk-alert>
-                <p>Kein Inhalt gefunden.</p>
-            </div>
-        `;
+        <div class="uk-alert uk-alert-warning" uk-alert>
+            <p>Kein Inhalt gefunden.</p>
+        </div>
+    `;
         return;
     }
 
@@ -278,7 +278,8 @@ function renderSyncView() {
         for (const file of files) {
             const form = new FormData();
             form.append('file', file);
-            form.append('folder', `sync/${folderName}`);
+            const syncPath = `${getUserFolder()?.replace(/\/$/, '')}/sync/${folderName}`;
+            form.append('folder', syncPath);
 
             await fetch(`${API_BASE}/upload`, {
                 method: 'POST',
@@ -300,8 +301,9 @@ function renderSyncOverview() {
     container.className = 'uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l';
     container.setAttribute('uk-grid', '');
 
+    const syncRoot = `${getUserFolder()?.replace(/\/$/, '')}/sync`;
     const syncFolders = Object.keys(folders)
-        .filter(p => p.startsWith('sync/') && folders[p].parent === 'sync');
+        .filter(p => p.startsWith(syncRoot + '/') && folders[p].parent === syncRoot);
 
     syncFolders.sort((a, b) => {
         const dA = new Date(folders[a].items?.[0]?.date || '1970-01-01');

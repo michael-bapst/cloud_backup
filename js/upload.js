@@ -19,7 +19,7 @@ window.handleUpload = async function (e) {
     }
 
     const relativePath = currentPath.join('/');
-    if (!relativePath || !relativePath.startsWith(userFolder)) {
+    if (!relativePath || !folders[relativePath]) {
         UIkit.notification({ message: 'Ungültiger Zielpfad', status: 'danger' });
         return;
     }
