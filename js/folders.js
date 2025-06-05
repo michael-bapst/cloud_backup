@@ -203,7 +203,6 @@ async function handleNewFolder(e) {
 
     const input = document.querySelector('#newFolderForm input[type="text"]');
     const name = input.value.trim();
-
     if (!name) {
         UIkit.notification({ message: 'Ordnername fehlt', status: 'danger' });
         return;
@@ -211,16 +210,17 @@ async function handleNewFolder(e) {
 
     const token = getToken();
     const userFolder = getUserFolder()?.replace(/\/$/, '');
-    const current = currentPath.join('/') === 'Home' ? '' : currentPath.join('/');
 
-    if (current !== '' && !current.startsWith(userFolder)) {
-        UIkit.notification({ message: 'Kein gültiger Zielpfad', status: 'danger' });
+    let basePath = '';
+    if (activeView === 'fotos') basePath = `${userFolder}/fotos`;
+    else if (activeView === 'alben') basePath = `${userFolder}/alben`;
+    else if (activeView === 'dateien') basePath = `${userFolder}/dateien`;
+    else {
+        UIkit.notification({ message: 'Ungültiger Speicherort', status: 'danger' });
         return;
     }
 
-    const fullPath = current ? `${userFolder}${current}/${name}` : `${userFolder}${name}`;
-    const parentPath = current ? `${userFolder}${current}` : userFolder;
-
+    const fullPath = `${basePath}/${name}`;
     const res = await fetch(`${API_BASE}/create-folder`, {
         method: 'POST',
         headers: {
@@ -242,23 +242,23 @@ async function handleNewFolder(e) {
     folders[fullPath] = {
         id: fullPath,
         name,
-        parent: parentPath,
+        parent: basePath,
         items: [],
         subfolders: []
     };
 
-    if (!folders[parentPath]) {
-        folders[parentPath] = {
-            id: parentPath,
-            name: parentPath.split('/').pop(),
+    if (!folders[basePath]) {
+        folders[basePath] = {
+            id: basePath,
+            name: basePath.split('/').pop(),
             items: [],
             subfolders: [],
-            parent: parentPath.includes('/') ? parentPath.split('/').slice(0, -1).join('/') : 'Home'
+            parent: 'Home'
         };
     }
 
-    if (!folders[parentPath].subfolders.includes(fullPath)) {
-        folders[parentPath].subfolders.push(fullPath);
+    if (!folders[basePath].subfolders.includes(fullPath)) {
+        folders[basePath].subfolders.push(fullPath);
     }
 
     UIkit.modal('#newFolderModal').hide();

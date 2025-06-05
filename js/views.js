@@ -38,11 +38,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function switchViewTo(view) {
+    const userFolder = getUserFolder()?.replace(/\/$/, '');
+    if (!userFolder) {
+        UIkit.notification({ message: 'Kein Benutzerverzeichnis', status: 'danger' });
+        return;
+    }
+
     if (view !== activeView) {
-        if (view === 'fotos' || view === 'alben') {
-            currentPath = [];
+        if (view === 'fotos') {
+            currentPath = [`${userFolder}/fotos`];
+        } else if (view === 'alben') {
+            currentPath = [`${userFolder}/alben`];
         } else if (view === 'dateien') {
-            currentPath = ['files'];
+            currentPath = [`${userFolder}/dateien`];
+        } else if (view === 'sync') {
+            currentPath = [`${userFolder}/sync`];
+        } else {
+            currentPath = [];
         }
     }
 
@@ -58,8 +70,8 @@ function switchViewTo(view) {
     const fabAlben = document.getElementById('fabAlben');
     const fabDateien = document.getElementById('fabDateien');
 
-    const isInAlbumRoot = view === 'alben' && currentPath.length === 0;
-    const isInAlbumFolder = view === 'alben' && currentPath.length > 0;
+    const isInAlbumRoot = view === 'alben' && currentPath.length === 1;
+    const isInAlbumFolder = view === 'alben' && currentPath.length > 1;
 
     if (heading) {
         heading.textContent =
@@ -77,21 +89,8 @@ function switchViewTo(view) {
 
     document.getElementById('breadcrumb')?.style.setProperty(
         'display',
-        view === 'alben' && currentPath.length > 0 ? 'block' : 'none'
+        view === 'alben' && currentPath.length > 1 ? 'block' : 'none'
     );
-
-    const backBtnContainer = document.getElementById('backBtnContainer');
-    backBtnContainer.innerHTML = '';
-    if (view === 'alben' && currentPath.length > 0) {
-        const backBtn = document.createElement('button');
-        backBtn.className = 'uk-button uk-button-default uk-flex uk-flex-middle';
-        backBtn.innerHTML = '<span uk-icon="arrow-left"></span><span class="uk-margin-small-left">Zurück zu Alben</span>';
-        backBtn.onclick = () => {
-            currentPath.pop();
-            switchViewTo('alben');
-        };
-        backBtnContainer.appendChild(backBtn);
-    }
 
     sessionStorage.setItem('lastView', view);
     sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
@@ -99,7 +98,7 @@ function switchViewTo(view) {
     if (view === 'fotos') {
         renderFotos();
     } else if (view === 'alben') {
-        if (currentPath.length === 0) {
+        if (currentPath.length === 1) {
             renderContent();
         } else {
             renderFotos();
@@ -115,12 +114,9 @@ function renderFotos() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    let path = currentPath.join('/');
-    if (path === '') path = 'fotos';
-
+    const path = currentPath.join('/');
     if (!folders[path]) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
-        console.warn('Verfügbare folders:', Object.keys(folders));
         return;
     }
 
@@ -146,15 +142,9 @@ function renderDateien() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const path = 'dateien';
-
+    const path = currentPath.join('/');
     if (!folders[path]) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
-        grid.innerHTML = `
-            <div class="uk-alert uk-alert-warning" uk-alert>
-                <p>Keine Dateien vorhanden.</p>
-            </div>
-        `;
         return;
     }
 
@@ -181,7 +171,7 @@ function renderContent() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const fullCurrentPath = currentPath.length === 0 ? 'alben' : currentPath.join('/');
+    const fullCurrentPath = currentPath.join('/');
     const data = folders[fullCurrentPath];
 
     if (!data) {
@@ -201,7 +191,7 @@ function renderContent() {
     const backBtnContainer = document.getElementById('backBtnContainer');
     backBtnContainer.innerHTML = '';
 
-    if (currentPath.length > 0) {
+    if (currentPath.length > 1) {
         const backBtn = document.createElement('button');
         backBtn.className = 'uk-button uk-button-default uk-flex uk-flex-middle';
         backBtn.innerHTML = '<span uk-icon="arrow-left"></span><span class="uk-margin-small-left">Zurück</span>';
@@ -214,13 +204,17 @@ function renderContent() {
 
     const frag = document.createDocumentFragment();
 
-    if (currentPath.length === 0) {
+    // Wenn wir im Root von „alben“ sind: nur Ordner zeigen
+    const userFolder = getUserFolder()?.replace(/\/$/, '');
+    const albumRoot = `${userFolder}/alben`;
+    const isRootOfAlben = fullCurrentPath === albumRoot;
+
+    if (isRootOfAlben) {
         data.subfolders.sort((a, b) => {
             const dA = new Date(folders[a].items?.[0]?.date || '1970-01-01');
             const dB = new Date(folders[b].items?.[0]?.date || '1970-01-01');
             return dB - dA;
         });
-
         data.subfolders.forEach(n => frag.appendChild(createFolderCard(folders[n])));
     } else {
         const filteredItems = data.items.filter(i => isMediaFile(i.name));

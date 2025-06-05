@@ -12,20 +12,19 @@ window.handleUpload = async function (e) {
     }
 
     const token = getToken();
-    const userFolder = getUserFolder();
+    const userFolder = getUserFolder()?.replace(/\/$/, '');
     if (!token || !userFolder) {
         UIkit.notification({ message: 'Benutzerdaten fehlen', status: 'danger' });
         return;
     }
 
-    let relativePath = currentPath.join('/');
-    if (activeView === 'fotos' && relativePath === '') {
-        relativePath = 'Home';
+    const relativePath = currentPath.join('/');
+    if (!relativePath || !relativePath.startsWith(userFolder)) {
+        UIkit.notification({ message: 'Ungültiger Zielpfad', status: 'danger' });
+        return;
     }
-    if (activeView === 'dateien') {
-        relativePath = 'files';
-    }
-    const targetPath = `${userFolder}${relativePath}`;
+
+    const targetPath = relativePath;
 
     const progressBar = document.getElementById('uploadProgressBar');
     progressBar.max = files.length;
@@ -53,12 +52,6 @@ window.handleUpload = async function (e) {
 
             xhr.open('POST', `${API_BASE}/upload`);
             xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    console.log(`Uploading ${file.name}: ${Math.round(event.loaded / event.total * 100)}%`);
-                }
-            };
 
             xhr.onload = () => {
                 completed++;
