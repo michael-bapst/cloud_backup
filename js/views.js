@@ -39,10 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function switchViewTo(view) {
     const userFolder = getUserFolder()?.replace(/\/$/, '');
-    if (!userFolder) {
-        UIkit.notification({ message: 'Kein Benutzerverzeichnis', status: 'danger' });
-        return;
-    }
+    if (!userFolder) return;
 
     if (view !== activeView) {
         if (view === 'fotos') {
@@ -142,9 +139,15 @@ function renderDateien() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const path = currentPath.join('/');
+    const path = `${getUserFolder()?.replace(/\/$/, '')}/dateien`;
+
     if (!folders[path]) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
+        grid.innerHTML = `
+            <div class="uk-alert uk-alert-warning" uk-alert>
+                <p>Keine Dateien vorhanden.</p>
+            </div>
+        `;
         return;
     }
 
@@ -178,7 +181,7 @@ function renderContent() {
         UIkit.notification({ message: `Pfad "${fullCurrentPath}" nicht gefunden`, status: 'danger' });
         grid.innerHTML = `
             <div class="uk-alert uk-alert-warning" uk-alert>
-                <p>Kein Inhalt für „${fullCurrentPath}“ gefunden.</p>
+                <p>Kein Inhalt gefunden.</p>
             </div>
         `;
         return;
@@ -188,43 +191,16 @@ function renderContent() {
     container.className = 'uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l';
     container.setAttribute('uk-grid', '');
 
-    const backBtnContainer = document.getElementById('backBtnContainer');
-    backBtnContainer.innerHTML = '';
-
-    if (currentPath.length > 1) {
-        const backBtn = document.createElement('button');
-        backBtn.className = 'uk-button uk-button-default uk-flex uk-flex-middle';
-        backBtn.innerHTML = '<span uk-icon="arrow-left"></span><span class="uk-margin-small-left">Zurück</span>';
-        backBtn.onclick = () => {
-            currentPath.pop();
-            renderContent();
-        };
-        backBtnContainer.appendChild(backBtn);
-    }
-
     const frag = document.createDocumentFragment();
 
-    // Wenn wir im Root von „alben“ sind: nur Ordner zeigen
-    const userFolder = getUserFolder()?.replace(/\/$/, '');
-    const albumRoot = `${userFolder}/alben`;
-    const isRootOfAlben = fullCurrentPath === albumRoot;
-
-    if (isRootOfAlben) {
+    if (data.subfolders.length) {
         data.subfolders.sort((a, b) => {
             const dA = new Date(folders[a].items?.[0]?.date || '1970-01-01');
             const dB = new Date(folders[b].items?.[0]?.date || '1970-01-01');
             return dB - dA;
         });
-        data.subfolders.forEach(n => frag.appendChild(createFolderCard(folders[n])));
-    } else {
-        const filteredItems = data.items.filter(i => isMediaFile(i.name));
-        filteredItems.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        filteredItems.forEach(it => {
-            const cardWrapper = document.createElement('div');
-            cardWrapper.appendChild(createFileCard(it));
-            container.appendChild(cardWrapper);
-        });
+        data.subfolders.forEach(n => frag.appendChild(createFolderCard(folders[n])));
     }
 
     container.appendChild(frag);

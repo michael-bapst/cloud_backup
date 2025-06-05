@@ -203,6 +203,7 @@ async function handleNewFolder(e) {
 
     const input = document.querySelector('#newFolderForm input[type="text"]');
     const name = input.value.trim();
+
     if (!name) {
         UIkit.notification({ message: 'Ordnername fehlt', status: 'danger' });
         return;
@@ -221,6 +222,7 @@ async function handleNewFolder(e) {
     }
 
     const fullPath = `${basePath}/${name}`;
+
     const res = await fetch(`${API_BASE}/create-folder`, {
         method: 'POST',
         headers: {
@@ -232,10 +234,7 @@ async function handleNewFolder(e) {
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        UIkit.notification({
-            message: err?.error || 'Ordner konnte nicht erstellt werden',
-            status: 'danger'
-        });
+        UIkit.notification({ message: err?.error || 'Ordner konnte nicht erstellt werden', status: 'danger' });
         return;
     }
 
