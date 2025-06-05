@@ -28,12 +28,21 @@ async function init() {
 
         const data = await res.json();
 
-        folders = {
-            fotos: { id: 'fotos', name: 'Fotos', parent: null, items: [], subfolders: [] },
-            alben: { id: 'alben', name: 'Alben', parent: null, items: [], subfolders: [] },
-            dateien: { id: 'dateien', name: 'Dateien', parent: null, items: [], subfolders: [] },
-            sync: { id: 'sync', name: 'Sync', parent: null, items: [], subfolders: [] }
-        };
+        folders = {};
+
+        const userFolder = getUserFolder()?.replace(/\/$/, '');
+        if (userFolder) {
+            ['fotos', 'alben', 'dateien', 'sync'].forEach(name => {
+                const fullPath = `${userFolder}/${name}`;
+                folders[fullPath] = {
+                    id: fullPath,
+                    name,
+                    parent: null,
+                    items: [],
+                    subfolders: []
+                };
+            });
+        }
 
         data.forEach(entry => {
             const key = entry.Key;
