@@ -46,3 +46,6 @@ function logout() {
     localStorage.removeItem('userFolder');
     window.location.href = 'index.html';
 }
+function getUserFolderTrimmed() {
+    return getUserFolder()?.replace(/\/$/, '');
+}

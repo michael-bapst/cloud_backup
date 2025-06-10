@@ -90,7 +90,8 @@ async function handleRename(e) {
     if (!newName || newName === oldName) return;
 
     const token = getToken();
-    const currentFullPath = currentPath.length === 0 ? 'Home' : currentPath.join('/');
+
+    const currentFullPath = currentPath.join('/');
     let oldPath = null;
 
     for (const key in folders) {
@@ -101,7 +102,7 @@ async function handleRename(e) {
         }
     }
 
-    if (!oldPath) {
+    if (!oldPath || !folders[oldPath]) {
         UIkit.notification({ message: 'Pfad nicht gefunden', status: 'danger' });
         return;
     }

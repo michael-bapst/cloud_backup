@@ -43,13 +43,13 @@ function switchViewTo(view) {
 
     if (view !== activeView) {
         if (view === 'fotos') {
-            currentPath = [userFolder, 'fotos'];
+            currentPath = [`${userFolder}/fotos`];
         } else if (view === 'alben') {
-            currentPath = [userFolder, 'alben'];
+            currentPath = [`${userFolder}/alben`];
         } else if (view === 'dateien') {
-            currentPath = [userFolder, 'dateien'];
+            currentPath = [`${userFolder}/dateien`];
         } else if (view === 'sync') {
-            currentPath = [userFolder, 'sync'];
+            currentPath = [`${userFolder}/sync`];
         } else {
             currentPath = [];
         }
@@ -67,13 +67,13 @@ function switchViewTo(view) {
     const fabAlben = document.getElementById('fabAlben');
     const fabDateien = document.getElementById('fabDateien');
 
-    const isInAlbumRoot = view === 'alben' && currentPath.length === 2;
-    const isInAlbumFolder = view === 'alben' && currentPath.length > 2;
+    const isInAlbumRoot = view === 'alben' && currentPath.length === 1;
+    const isInAlbumFolder = view === 'alben' && currentPath.length > 1;
 
     if (heading) {
         heading.textContent =
             view === 'fotos' ? 'Fotos' :
-                isInAlbumFolder ? `Alben / ${currentPath.at(-1)}` :
+                isInAlbumFolder ? `Alben / ${currentPath.at(-1).split('/').pop()}` :
                     view === 'alben' ? 'Alben' :
                         view === 'dateien' ? 'Dateien' : '';
     }
@@ -86,7 +86,7 @@ function switchViewTo(view) {
 
     document.getElementById('breadcrumb')?.style.setProperty(
         'display',
-        view === 'alben' && currentPath.length > 2 ? 'block' : 'none'
+        view === 'alben' && currentPath.length > 1 ? 'block' : 'none'
     );
 
     sessionStorage.setItem('lastView', view);
