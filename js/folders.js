@@ -37,22 +37,22 @@ function createFolderCard(f) {
 
     loadPreview();
 
-    div.innerHTML = `
-        <div class="album-card-inner" onclick="navigateToFolder(decodeURIComponent('${safeId}'))">
-            ${thumbnailWrapper.outerHTML}
-            <div class="album-meta">
-                <div class="album-title">${f.name}</div>
-                <div class="album-sub">${date}</div>
-            </div>
+    div.innerHTML =
+        `<div class="album-card-inner" onclick="navigateToFolder('${safeId}')">
+        ${thumbnailWrapper.outerHTML}
+        <div class="album-meta">
+            <div class="album-title">${f.name}</div>
+            <div class="album-sub">${date}</div>
         </div>
-        <div class="album-actions">
-            <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); editFolder(decodeURIComponent('${safeId}'), event)">
-                <span uk-icon="pencil"></span>
-            </button>
-            <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); deleteFolder(decodeURIComponent('${safeId}'), event)">
-                <span uk-icon="trash"></span>
-            </button>
-        </div>
+    </div>
+    <div class="album-actions">
+        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); editFolder('${safeId}', event)">
+            <span uk-icon="pencil"></span>
+        </button>
+        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); deleteFolder('${safeId}', event)">
+            <span uk-icon="trash"></span>
+        </button>
+    </div>
     `;
 
     return div;
@@ -63,7 +63,7 @@ function navigateToFolder(path) {
         UIkit.notification({ message: `Ordner "${path}" nicht gefunden`, status: 'danger' });
         return;
     }
-    currentPath = path.split('/');
+    currentPath = [path];
     switchViewTo('alben');
 }
 
@@ -96,7 +96,10 @@ async function handleRename(e) {
 
     for (const key in folders) {
         const f = folders[key];
-        if (f.name === oldName && f.parent === currentFullPath) {
+        const fParent = typeof f.parent === 'string' ? f.parent.replace(/\/$/, '') : '';
+        const pathClean = currentFullPath.replace(/\/$/, '');
+
+        if (f.name === oldName && fParent === pathClean) {
             oldPath = key;
             break;
         }
