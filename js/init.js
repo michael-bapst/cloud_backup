@@ -30,7 +30,6 @@ async function init() {
 
         folders = {};
 
-        // ✅ Korrekte Initialisierung aller Basis-Ordner
         folders[userFolder] = {
             id: userFolder,
             name: userFolder.split('/').pop(),
@@ -53,7 +52,7 @@ async function init() {
 
         data.forEach(entry => {
             const key = entry.Key;
-            if (!key || !key.startsWith(userFolder + "/")) return;
+            if (!key || key.endsWith('.keep')) return;
 
             const relKey = key.slice(userFolder.length);
             const parts = relKey.split("/").filter(Boolean);
