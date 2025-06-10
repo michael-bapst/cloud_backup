@@ -16,13 +16,6 @@
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js"></script>
 </head>
 
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js')
-            .catch(console.error);
-    }
-</script>
-
 <body>
 <div class="uk-section uk-section-small uk-flex uk-flex-middle uk-flex-center" style="min-height:100vh;">
     <div class="uk-container uk-container-xsmall">
@@ -53,9 +46,18 @@
     </div>
 </div>
 
-<script src="js/helpers.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/login.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+            .catch(console.error);
+    }
+</script>
+
+<script type="module">
+    import './js/helpers.js';
+    import './js/auth.js';
+    import './js/login.js';
+</script>
 
 </body>
 </html>
