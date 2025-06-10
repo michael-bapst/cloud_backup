@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function switchViewTo(view) {
-    const userFolder = getUserFolder()?.replace(/\/$/, '');
+    const userFolder = getUserFolderTrimmed();
     if (!userFolder) return;
 
     if (view !== activeView) {
@@ -278,7 +278,7 @@ function renderSyncView() {
         for (const file of files) {
             const form = new FormData();
             form.append('file', file);
-            const syncPath = `${getUserFolder()?.replace(/\/$/, '')}/sync/${folderName}`;
+            const syncPath = `${getUserFolderTrimmed()}/sync/${folderName}`;
             form.append('folder', syncPath);
 
             await fetch(`${API_BASE}/upload`, {
@@ -301,7 +301,7 @@ function renderSyncOverview() {
     container.className = 'uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l';
     container.setAttribute('uk-grid', '');
 
-    const syncRoot = `${getUserFolder()?.replace(/\/$/, '')}/sync`;
+    const syncRoot = `${getUserFolderTrimmed()}/sync`;
     const syncFolders = Object.keys(folders)
         .filter(p => p.startsWith(syncRoot + '/') && folders[p].parent === syncRoot);
 

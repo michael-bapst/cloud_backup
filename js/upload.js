@@ -12,7 +12,7 @@ window.handleUpload = async function (e) {
     }
 
     const token = getToken();
-    const userFolder = getUserFolder()?.replace(/\/$/, '');
+    const userFolder = getUserFolderTrimmed();
     if (!token || !userFolder) {
         UIkit.notification({ message: 'Benutzerdaten fehlen', status: 'danger' });
         return;

@@ -28,6 +28,10 @@ function saveToken(token, stayLoggedIn) {
     }
 }
 
+function getUserFolderTrimmed() {
+    return getUserFolder()?.replace(/\/$/, '');
+}
+
 function getToken() {
     return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
 }
@@ -45,7 +49,4 @@ function logout() {
     sessionStorage.removeItem('authToken');
     localStorage.removeItem('userFolder');
     window.location.href = 'index.html';
-}
-function getUserFolderTrimmed() {
-    return getUserFolder()?.replace(/\/$/, '');
 }

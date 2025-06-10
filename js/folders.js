@@ -211,7 +211,7 @@ async function handleNewFolder(e) {
     }
 
     const token = getToken();
-    const userFolder = getUserFolder()?.replace(/\/$/, '');
+    const userFolder = getUserFolderTrimmed();
 
     let basePath = '';
     if (activeView === 'fotos') basePath = `${userFolder}/fotos`;

@@ -1,6 +1,6 @@
 async function init() {
     const token = getToken();
-    const userFolder = getUserFolder()?.replace(/\/$/, '');
+    const userFolder = getUserFolderTrimmed();
     if (!token || !userFolder) {
         window.location.href = 'index.html';
         return;
@@ -30,7 +30,7 @@ async function init() {
 
         folders = {};
 
-        const userFolder = getUserFolder()?.replace(/\/$/, '');
+        const userFolder = getUserFolderTrimmed();
         if (userFolder) {
             ['fotos', 'alben', 'dateien', 'sync'].forEach(name => {
                 const fullPath = `${userFolder}/${name}`;
