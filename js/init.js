@@ -140,4 +140,5 @@ async function init() {
             : error.message;
         UIkit.notification({ message: msg, status: 'danger' });
     }
+    console.log("FOLDER KEYS:", Object.keys(folders));
 }
