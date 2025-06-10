@@ -52,7 +52,7 @@ async function init() {
 
         data.forEach(entry => {
             const key = entry.Key;
-            if (!key || key.endsWith('.keep')) return;
+            if (!key || !key.startsWith(userFolder + "/") || key.endsWith(".keep")) return;
 
             const relKey = key.slice(userFolder.length);
             const parts = relKey.split("/").filter(Boolean);
