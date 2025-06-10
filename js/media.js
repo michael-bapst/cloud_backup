@@ -2,7 +2,7 @@ window.isMediaFile = function (name) {
     return /\.(jpe?g|png|gif|bmp|webp|mp4|webm)$/i.test(name);
 };
 
-async function getSignedFileUrl(key) {
+export async function getSignedFileUrl(key) {
     const token = getToken();
     const apiUrl = `${API_BASE}/file-url?key=${encodeURIComponent(key)}`;
 

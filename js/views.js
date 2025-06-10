@@ -11,6 +11,7 @@ import {
     handleRename,
     confirmDelete
 } from './folders.js';
+import {init} from "./init";
 
 window.currentPath = window.currentPath || [];
 window.folders = window.folders || {};
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    switchViewTo('fotos');
+    init().catch(err => console.error("Fehler beim init:", err));
 });
 
 function switchViewTo(view) {

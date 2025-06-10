@@ -1,4 +1,6 @@
-async function init() {
+import {getToken, getUserFolderTrimmed} from "./helpers";
+
+export async function init() {
     const token = getToken();
     const userFolder = getUserFolderTrimmed();
     if (!token || !userFolder) {
