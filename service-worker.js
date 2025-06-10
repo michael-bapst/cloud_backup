@@ -13,9 +13,9 @@ const ASSETS_TO_CACHE = [
     './js/lazy.js',
     './js/login.js',
     './js/media.js',
+    './js/setpassword.js',
     './js/upload.js',
     './js/views.js',
-    './js/setpassword.js',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/css/uikit.min.css',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit.min.js',
     'https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js'
@@ -31,7 +31,13 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) =>
-            Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
+            Promise.all(
+                keys.map((key) => {
+                    if (key !== CACHE_NAME) {
+                        return caches.delete(key);
+                    }
+                })
+            )
         )
     );
     self.clients.claim();
@@ -44,7 +50,9 @@ self.addEventListener('fetch', (event) => {
         fetch(event.request)
             .then((response) => {
                 const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+                if (event.request.url.startsWith(self.location.origin)) {
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+                }
                 return response;
             })
             .catch(() => caches.match(event.request))

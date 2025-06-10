@@ -114,7 +114,9 @@ async function init() {
                     name,
                     key,
                     size: formatFileSize(entry.Size || 0),
-                    date: entry.LastModified?.split("T")[0] || ""
+                    date: entry.LastModified
+                        ? new Date(entry.LastModified).toISOString().slice(0, 10)
+                        : ""
                 });
             }
         });

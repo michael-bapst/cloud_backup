@@ -16,6 +16,13 @@
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js"></script>
 </head>
 
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+            .catch(console.error);
+    }
+</script>
+
 <body>
 <div class="uk-section uk-section-small uk-flex uk-flex-middle uk-flex-center" style="min-height:100vh;">
     <div class="uk-container uk-container-xsmall">

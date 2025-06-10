@@ -18,6 +18,13 @@
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js"></script>
 </head>
 
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+            .catch(console.error);
+  }
+</script>
+
 <body>
 
 <button class="uk-button uk-button-default uk-position-top-right uk-margin-small-top uk-margin-small-right" id="logoutBtn">

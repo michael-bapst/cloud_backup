@@ -1,4 +1,6 @@
-function saveToken(token, stayLoggedIn) {
+import { getToken, getUserFolderTrimmed, handleLogout } from './helpers.js';
+
+export function saveToken(token, stayLoggedIn) {
     try {
         if (stayLoggedIn) {
             localStorage.setItem('authToken', token);
@@ -28,25 +30,6 @@ function saveToken(token, stayLoggedIn) {
     }
 }
 
-function getUserFolderTrimmed() {
-    return getUserFolder()?.replace(/\/$/, '');
-}
-
-function getToken() {
-    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-}
-
-function getUserFolder() {
-    return localStorage.getItem('userFolder');
-}
-
-function isAuthenticated() {
+export function isAuthenticated() {
     return !!getToken();
-}
-
-function logout() {
-    localStorage.removeItem('authToken');
-    sessionStorage.removeItem('authToken');
-    localStorage.removeItem('userFolder');
-    window.location.href = 'index.html';
 }

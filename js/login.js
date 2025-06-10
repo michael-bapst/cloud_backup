@@ -1,3 +1,6 @@
+import { saveToken, isAuthenticated } from './auth.js';
+import { getToken, getUserFolderTrimmed } from './helpers.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     if (isAuthenticated()) {
         window.location.href = 'app.html';

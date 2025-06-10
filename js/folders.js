@@ -39,7 +39,7 @@ function createFolderCard(f) {
 
     div.innerHTML = `
     <div class="album-card-inner" onclick="navigateToFolder('${f.id}')">
-        ${thumbnailWrapper.outerHTML}
+        <div class="album-thumbnail"></div>
         <div class="album-meta">
             <div class="album-title">${f.name}</div>
             <div class="album-sub">${date}</div>
@@ -54,6 +54,9 @@ function createFolderCard(f) {
         </button>
     </div>
 `;
+
+    const thumbContainer = div.querySelector('.album-thumbnail');
+    thumbContainer.replaceWith(thumbnailWrapper);
 
     return div;
 }

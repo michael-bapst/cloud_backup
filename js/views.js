@@ -219,13 +219,12 @@ function switchView(mode) {
 }
 
 function updateBreadcrumb() {
-    const bc = document.getElementById('breadcrumb');
-    if (!bc) return;
-    bc.innerHTML = currentPath.map((p, i) =>
-        i === currentPath.length - 1
-            ? `<li><span>${p}</span></li>`
-            : `<li><a href="#">${p}</a></li>`
-    ).join('');
+    bc.innerHTML = currentPath.map((p, i) => {
+        const name = p.split('/').pop();
+        return i === currentPath.length - 1
+            ? `<li><span>${name}</span></li>`
+            : `<li><a href="#">${name}</a></li>`;
+    }).join('');
 }
 
 function navigateToPath(path) {
