@@ -30,19 +30,26 @@ async function init() {
 
         folders = {};
 
-        const userFolder = getUserFolderTrimmed();
-        if (userFolder) {
-            ['fotos', 'alben', 'dateien', 'sync'].forEach(name => {
-                const fullPath = `${userFolder}/${name}`;
-                folders[fullPath] = {
-                    id: fullPath,
-                    name,
-                    parent: null,
-                    items: [],
-                    subfolders: []
-                };
-            });
-        }
+        // ✅ Korrekte Initialisierung aller Basis-Ordner
+        folders[userFolder] = {
+            id: userFolder,
+            name: userFolder.split('/').pop(),
+            parent: null,
+            items: [],
+            subfolders: []
+        };
+
+        ['fotos', 'alben', 'dateien', 'sync'].forEach(name => {
+            const fullPath = `${userFolder}/${name}`;
+            folders[fullPath] = {
+                id: fullPath,
+                name,
+                parent: userFolder,
+                items: [],
+                subfolders: []
+            };
+            folders[userFolder].subfolders.push(fullPath);
+        });
 
         data.forEach(entry => {
             const key = entry.Key;
@@ -54,27 +61,27 @@ async function init() {
 
             const isFolder = key.endsWith("/");
             const name = parts.at(-1);
-            const fullPath = parts.join("/");
-            const parentPath = parts.slice(0, -1).join("/") || parts[0];
+            const fullPath = `${userFolder}/${parts.join("/")}`;
+            const parentPath = `${userFolder}/${parts.slice(0, -1).join("/")}`;
 
-            const top = parts[0];
+            const top = `${userFolder}/${parts[0]}`;
             if (!folders[top]) {
-                folders[top] = { id: top, name: top, parent: null, items: [], subfolders: [] };
+                folders[top] = { id: top, name: parts[0], parent: userFolder, items: [], subfolders: [] };
             }
 
             if (isFolder) {
                 for (let i = 1; i <= parts.length; i++) {
-                    const segPath = parts.slice(0, i).join("/");
-                    const parent = parts.slice(0, i - 1).join("/") || top;
+                    const segPath = `${userFolder}/${parts.slice(0, i).join("/")}`;
+                    const parent = `${userFolder}/${parts.slice(0, i - 1).join("/")}`;
                     const segName = parts[i - 1];
 
                     if (!folders[parent]) {
                         folders[parent] = {
                             id: parent,
-                            name: segName,
+                            name: parent.split('/').pop(),
                             items: [],
                             subfolders: [],
-                            parent: parent.includes("/") ? parent.split("/").slice(0, -1).join("/") : top
+                            parent: parent.includes("/") ? parent.split("/").slice(0, -1).join("/") : userFolder
                         };
                     }
 
@@ -99,7 +106,7 @@ async function init() {
                         name: parentPath.split("/").pop(),
                         items: [],
                         subfolders: [],
-                        parent: parentPath.includes("/") ? parentPath.split("/").slice(0, -1).join("/") : top
+                        parent: parentPath.includes("/") ? parentPath.split("/").slice(0, -1).join("/") : userFolder
                     };
                 }
 
@@ -120,7 +127,7 @@ async function init() {
             currentPath = lastPath;
             switchViewTo(lastView);
         } else {
-            currentPath = [];
+            currentPath = [`${userFolder}/fotos`];
             switchViewTo('fotos');
         }
 
@@ -133,18 +140,4 @@ async function init() {
             : error.message;
         UIkit.notification({ message: msg, status: 'danger' });
     }
-}
-
-function getUserFolder() {
-    const token = getToken();
-    if (!token) return null;
-
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const email = payload.email?.toLowerCase();
-        if (email) return `users/${email}/`;
-    } catch (e) {
-        console.warn("Token-Problem:", e);
-    }
-    return null;
 }
