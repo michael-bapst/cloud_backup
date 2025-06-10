@@ -1,4 +1,4 @@
-const API_BASE = 'https://cloud-backend-2-ttrb.onrender.com';
+export const API_BASE = 'https://cloud-backend-2-ttrb.onrender.com';
 
 export function getToken() {
     return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');

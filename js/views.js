@@ -1,3 +1,5 @@
+import { handleLogout, getUserFolderTrimmed, getToken, API_BASE } from './helpers.js';
+
 window.currentPath = window.currentPath || [];
 window.folders = window.folders || {};
 

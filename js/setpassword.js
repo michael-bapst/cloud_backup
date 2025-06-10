@@ -1,3 +1,5 @@
+import { API_BASE } from './helpers.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');

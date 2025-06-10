@@ -1,4 +1,4 @@
-import { getToken, getUserFolderTrimmed, handleLogout } from './helpers.js';
+import { getToken } from './helpers.js';
 
 export function saveToken(token, stayLoggedIn) {
     try {

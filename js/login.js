@@ -1,5 +1,5 @@
 import { saveToken, isAuthenticated } from './auth.js';
-import { getToken, getUserFolderTrimmed } from './helpers.js';
+import { API_BASE } from './helpers.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     if (isAuthenticated()) {
