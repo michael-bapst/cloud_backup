@@ -37,8 +37,8 @@ function createFolderCard(f) {
 
     loadPreview();
 
-    div.innerHTML =
-        `<div class="album-card-inner" onclick="navigateToFolder('${safeId}')">
+    div.innerHTML = `
+    <div class="album-card-inner" onclick="navigateToFolder('${f.id}')">
         ${thumbnailWrapper.outerHTML}
         <div class="album-meta">
             <div class="album-title">${f.name}</div>
@@ -46,14 +46,14 @@ function createFolderCard(f) {
         </div>
     </div>
     <div class="album-actions">
-        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); editFolder('${safeId}', event)">
+        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); editFolder('${f.id}', event)">
             <span uk-icon="pencil"></span>
         </button>
-        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); deleteFolder('${safeId}', event)">
+        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); deleteFolder('${f.id}', event)">
             <span uk-icon="trash"></span>
         </button>
     </div>
-    `;
+`;
 
     return div;
 }
