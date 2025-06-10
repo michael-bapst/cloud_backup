@@ -1,4 +1,16 @@
-import { handleLogout, getUserFolderTrimmed, getToken, API_BASE } from './helpers.js';
+import {
+    handleLogout,
+    getUserFolderTrimmed,
+    getToken,
+    API_BASE,
+    showLoading
+} from './helpers.js';
+
+import {
+    handleNewFolder,
+    handleRename,
+    confirmDelete
+} from './folders.js';
 
 window.currentPath = window.currentPath || [];
 window.folders = window.folders || {};

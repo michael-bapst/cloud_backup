@@ -86,7 +86,7 @@ function editFolder(path, event) {
     UIkit.modal('#renameModal').show();
 }
 
-async function handleRename(e) {
+export async function handleRename(e) {
     e.preventDefault();
     const oldName = document.getElementById('renameOldName').value.trim();
     const newName = document.getElementById('renameNewName').value.trim();
@@ -163,7 +163,7 @@ function deleteFolder(path, event) {
     UIkit.modal('#deleteModal').show();
 }
 
-async function confirmDelete() {
+export async function confirmDelete() {
     const fullPath = folderToDelete;
     const token = getToken();
 
@@ -205,7 +205,7 @@ async function confirmDelete() {
     }
 }
 
-async function handleNewFolder(e) {
+export async function handleNewFolder(e) {
     e.preventDefault();
 
     const input = document.querySelector('#newFolderForm input[type="text"]');
