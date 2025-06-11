@@ -330,3 +330,5 @@ function renderSyncOverview() {
     container.appendChild(frag);
     grid.appendChild(container);
 }
+
+window.switchViewTo = switchViewTo;
