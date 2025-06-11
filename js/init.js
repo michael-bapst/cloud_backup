@@ -1,4 +1,5 @@
 import { getToken, getUserFolderTrimmed, API_BASE, formatFileSize } from './helpers.js';
+import { switchViewTo } from './views.js';
 
 export async function init() {
     const token = getToken();

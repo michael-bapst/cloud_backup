@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     init().catch(err => console.error("Fehler beim init:", err));
 });
 
-function switchViewTo(view) {
+export function switchViewTo(view) {
     const userFolder = getUserFolderTrimmed();
     if (!userFolder) return;
 
@@ -330,5 +330,3 @@ function renderSyncOverview() {
     container.appendChild(frag);
     grid.appendChild(container);
 }
-
-window.switchViewTo = switchViewTo;
