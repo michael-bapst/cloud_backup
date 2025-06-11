@@ -61,7 +61,7 @@ async function downloadFile(key) {
     }
 }
 
-function createFileCard(item) {
+export function createFileCard(item) {
     const container = document.createElement('div');
     container.className = 'file-tile';
     container.style.position = 'relative';
