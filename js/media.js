@@ -1,8 +1,8 @@
 import { getToken, API_BASE } from './helpers.js';
 
-window.isMediaFile = function (name) {
+export function isMediaFile(name) {
     return /\.(jpe?g|png|gif|bmp|webp|mp4|webm)$/i.test(name);
-};
+}
 
 export async function getSignedFileUrl(key) {
     const token = getToken();
