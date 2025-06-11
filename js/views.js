@@ -1,3 +1,4 @@
+import { init } from './init.js';
 import {
     handleLogout,
     getUserFolderTrimmed,
@@ -5,13 +6,11 @@ import {
     API_BASE,
     showLoading
 } from './helpers.js';
-
 import {
     handleNewFolder,
     handleRename,
     confirmDelete
 } from './folders.js';
-import {init} from "./init";
 
 window.currentPath = window.currentPath || [];
 window.folders = window.folders || {};
