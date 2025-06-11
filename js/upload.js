@@ -1,3 +1,5 @@
+import { getToken, getUserFolderTrimmed, API_BASE } from './helpers.js';
+
 const allowedImages = /\.(jpe?g|png|gif|bmp|webp)$/i;
 const allowedDocs = /\.(pdf|zip|docx?|xlsx?|txt|json)$/i;
 

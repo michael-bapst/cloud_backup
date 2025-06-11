@@ -1,3 +1,5 @@
+import { getToken, API_BASE } from './helpers.js';
+
 window.isMediaFile = function (name) {
     return /\.(jpe?g|png|gif|bmp|webp|mp4|webm)$/i.test(name);
 };

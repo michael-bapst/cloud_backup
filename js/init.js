@@ -1,4 +1,4 @@
-import {getToken, getUserFolderTrimmed} from "./helpers";
+import { getToken, getUserFolderTrimmed, API_BASE, formatFileSize } from './helpers.js';
 
 export async function init() {
     const token = getToken();
