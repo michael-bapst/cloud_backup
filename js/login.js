@@ -1,10 +1,19 @@
 import { saveToken, isAuthenticated } from './auth.js';
-import { API_BASE } from './helpers.js';
+import { API_BASE, getUserFolderTrimmed } from './helpers.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (isAuthenticated()) {
+    const hasToken = isAuthenticated();
+    const folder = getUserFolderTrimmed();
+
+    if (hasToken && folder) {
         window.location.href = 'app.html';
         return;
+    }
+
+    if (hasToken && !folder) {
+        localStorage.removeItem('authToken');
+        sessionStorage.removeItem('authToken');
+        localStorage.removeItem('userFolder');
     }
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
