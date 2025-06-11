@@ -1,7 +1,9 @@
+import { globals } from './globals.js';
 import { getToken, getUserFolderTrimmed, API_BASE } from './helpers.js';
 import { getSignedFileUrl, isMediaFile } from './media.js';
 
 function createFolderCard(f) {
+    const { folders } = globals;
     const date = new Date().toLocaleDateString('de-DE');
     const safeId = encodeURIComponent(f.id);
 
@@ -10,12 +12,10 @@ function createFolderCard(f) {
 
     const thumbnailWrapper = document.createElement('div');
     thumbnailWrapper.className = 'album-thumbnail';
-
     thumbnailWrapper.innerHTML = `<span uk-icon="icon: image; ratio: 2" class="album-placeholder-icon"></span>`;
 
     const loadPreview = async () => {
         let mediaItem = f.items?.find(i => isMediaFile(i.name));
-
         if (!mediaItem && folders[f.id]?.items?.length) {
             mediaItem = folders[f.id].items.find(i => isMediaFile(i.name));
         }
@@ -56,7 +56,7 @@ function createFolderCard(f) {
             <span uk-icon="trash"></span>
         </button>
     </div>
-`;
+    `;
 
     const thumbContainer = div.querySelector('.album-thumbnail');
     thumbContainer.replaceWith(thumbnailWrapper);
@@ -65,11 +65,12 @@ function createFolderCard(f) {
 }
 
 function navigateToFolder(path) {
+    const { folders } = globals;
     if (!folders[path]) {
         UIkit.notification({ message: `Ordner "${path}" nicht gefunden`, status: 'danger' });
         return;
     }
-    currentPath = [path];
+    globals.currentPath = [path];
     switchViewTo('alben');
 }
 
@@ -77,6 +78,7 @@ let folderToDelete = null;
 
 function editFolder(path, event) {
     event.stopPropagation();
+    const { folders } = globals;
     const f = folders[path];
     if (!f) {
         UIkit.notification({ message: `Ordner "${path}" nicht gefunden`, status: 'danger' });
@@ -91,12 +93,13 @@ function editFolder(path, event) {
 
 export async function handleRename(e) {
     e.preventDefault();
+    const { folders, currentPath, activeView } = globals;
+
     const oldName = document.getElementById('renameOldName').value.trim();
     const newName = document.getElementById('renameNewName').value.trim();
     if (!newName || newName === oldName) return;
 
     const token = getToken();
-
     const currentFullPath = currentPath.join('/');
     let oldPath = null;
 
@@ -145,15 +148,13 @@ export async function handleRename(e) {
 
     UIkit.modal('#renameModal').hide();
 
-    if (activeView === 'alben') {
-        renderContent();
-    } else if (activeView === 'fotos') {
-        renderFotos();
-    }
+    if (activeView === 'alben') renderContent();
+    else if (activeView === 'fotos') renderFotos();
 }
 
 function deleteFolder(path, event) {
     event.stopPropagation();
+    const { folders } = globals;
     folderToDelete = path;
 
     const f = folders[path];
@@ -167,6 +168,7 @@ function deleteFolder(path, event) {
 }
 
 export async function confirmDelete() {
+    const { folders, activeView } = globals;
     const fullPath = folderToDelete;
     const token = getToken();
 
@@ -199,17 +201,14 @@ export async function confirmDelete() {
     UIkit.modal('#deleteModal').hide();
     UIkit.notification({ message: 'Ordner gelöscht', status: 'success' });
 
-    if (activeView === 'alben') {
-        renderContent();
-    } else if (activeView === 'fotos') {
-        renderFotos();
-    } else if (activeView === 'dateien') {
-        renderDateien();
-    }
+    if (activeView === 'alben') renderContent();
+    else if (activeView === 'fotos') renderFotos();
+    else if (activeView === 'dateien') renderDateien();
 }
 
 export async function handleNewFolder(e) {
     e.preventDefault();
+    const { activeView, folders } = globals;
 
     const input = document.querySelector('#newFolderForm input[type="text"]');
     const name = input.value.trim();

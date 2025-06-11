@@ -1,4 +1,5 @@
 import { getToken, API_BASE } from './helpers.js';
+import { globals } from './globals.js';
 
 export function isMediaFile(name) {
     return /\.(jpe?g|png|gif|bmp|webp|mp4|webm)$/i.test(name);
@@ -10,17 +11,12 @@ export async function getSignedFileUrl(key) {
 
     const res = await fetch(apiUrl, {
         method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`
-        },
+        headers: { Authorization: `Bearer ${token}` },
         mode: 'cors',
         cache: 'no-store'
     });
 
-    if (!res.ok) {
-        throw new Error(`Presign fehlgeschlagen (${res.status})`);
-    }
-
+    if (!res.ok) throw new Error(`Presign fehlgeschlagen (${res.status})`);
     const data = await res.json();
     return data.url;
 }
@@ -40,15 +36,12 @@ async function deleteFile(key, e) {
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        UIkit.notification({
-            message: err?.error || 'Löschen fehlgeschlagen',
-            status: 'danger'
-        });
+        UIkit.notification({ message: err?.error || 'Löschen fehlgeschlagen', status: 'danger' });
         return;
     }
 
     UIkit.notification({ message: 'Datei gelöscht', status: 'success' });
-    renderContent();
+    import('./views.js').then(m => m.switchViewTo(globals.activeView));
 }
 
 async function downloadFile(key) {
@@ -69,7 +62,6 @@ export function createFileCard(item) {
     const preview = document.createElement('div');
     preview.className = 'file-preview';
 
-    const fileType = item.name.split('.').pop().toLowerCase();
     const isImage = /\.(jpe?g|png|gif|bmp|webp)$/i.test(item.name);
     const isVideo = /\.(mp4|webm)$/i.test(item.name);
     const isPDF = /\.pdf$/i.test(item.name);
@@ -80,9 +72,7 @@ export function createFileCard(item) {
         const img = document.createElement('img');
         img.alt = item.name;
         img.style.objectFit = 'contain';
-        getSignedFileUrl(item.key).then(url => {
-            img.src = url;
-        });
+        getSignedFileUrl(item.key).then(url => img.src = url);
         preview.appendChild(img);
     } else if (isVideo) {
         const video = document.createElement('video');
@@ -90,9 +80,7 @@ export function createFileCard(item) {
         video.loop = true;
         video.muted = true;
         video.playsInline = true;
-        getSignedFileUrl(item.key).then(url => {
-            video.src = url;
-        });
+        getSignedFileUrl(item.key).then(url => video.src = url);
         preview.appendChild(video);
     } else {
         const icon = document.createElement('span');
@@ -124,9 +112,9 @@ export function createFileCard(item) {
     const meta = document.createElement('div');
     meta.className = 'file-meta';
     meta.innerHTML = `
-        <div class="uk-text-small uk-text-truncate" title="${item.name}">${item.name}</div>
-        <div class="uk-text-meta">${item.size} • ${item.date}</div>
-    `;
+    <div class="uk-text-small uk-text-truncate" title="${item.name}">${item.name}</div>
+    <div class="uk-text-meta">${item.size} • ${item.date}</div>
+  `;
 
     container.appendChild(preview);
     container.appendChild(actions);

@@ -1,11 +1,14 @@
 {
-  "name": "Andrea Lio Michael ❤️",
-  "short_name": "ALM ❤️",
-  "description": "Lokale Verwaltung privater Medien",
+  "name": "Backup Cloud",
+  "short_name": "Cloud",
+  "description": "Sichere Verwaltung und Synchronisierung persönlicher Medien und Dateien",
   "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#f8f8f8",
+  "background_color": "#ffffff",
   "theme_color": "#1e87f0",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "de",
   "icons": [
     {
       "src": "icons/web-app-manifest-192x192.png",

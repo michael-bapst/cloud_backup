@@ -1,3 +1,4 @@
+import { globals } from './globals.js';
 import { getToken, getUserFolderTrimmed, API_BASE, formatFileSize } from './helpers.js';
 import { switchViewTo } from './views.js';
 
@@ -31,9 +32,9 @@ export async function init() {
 
         const data = await res.json();
 
-        folders = {};
+        globals.folders = {};
 
-        folders[userFolder] = {
+        globals.folders[userFolder] = {
             id: userFolder,
             name: userFolder.split('/').pop(),
             parent: null,
@@ -43,14 +44,14 @@ export async function init() {
 
         ['fotos', 'alben', 'dateien', 'sync'].forEach(name => {
             const fullPath = `${userFolder}/${name}`;
-            folders[fullPath] = {
+            globals.folders[fullPath] = {
                 id: fullPath,
                 name,
                 parent: userFolder,
                 items: [],
                 subfolders: []
             };
-            folders[userFolder].subfolders.push(fullPath);
+            globals.folders[userFolder].subfolders.push(fullPath);
         });
 
         data.forEach(entry => {
@@ -67,8 +68,14 @@ export async function init() {
             const parentPath = `${userFolder}/${parts.slice(0, -1).join("/")}`;
 
             const top = `${userFolder}/${parts[0]}`;
-            if (!folders[top]) {
-                folders[top] = { id: top, name: parts[0], parent: userFolder, items: [], subfolders: [] };
+            if (!globals.folders[top]) {
+                globals.folders[top] = {
+                    id: top,
+                    name: parts[0],
+                    parent: userFolder,
+                    items: [],
+                    subfolders: []
+                };
             }
 
             if (isFolder) {
@@ -77,8 +84,8 @@ export async function init() {
                     const parent = `${userFolder}/${parts.slice(0, i - 1).join("/")}`;
                     const segName = parts[i - 1];
 
-                    if (!folders[parent]) {
-                        folders[parent] = {
+                    if (!globals.folders[parent]) {
+                        globals.folders[parent] = {
                             id: parent,
                             name: parent.split('/').pop(),
                             items: [],
@@ -87,8 +94,8 @@ export async function init() {
                         };
                     }
 
-                    if (!folders[segPath]) {
-                        folders[segPath] = {
+                    if (!globals.folders[segPath]) {
+                        globals.folders[segPath] = {
                             id: segPath,
                             name: segName,
                             items: [],
@@ -97,13 +104,13 @@ export async function init() {
                         };
                     }
 
-                    if (!folders[parent].subfolders.includes(segPath)) {
-                        folders[parent].subfolders.push(segPath);
+                    if (!globals.folders[parent].subfolders.includes(segPath)) {
+                        globals.folders[parent].subfolders.push(segPath);
                     }
                 }
             } else {
-                if (!folders[parentPath]) {
-                    folders[parentPath] = {
+                if (!globals.folders[parentPath]) {
+                    globals.folders[parentPath] = {
                         id: parentPath,
                         name: parentPath.split("/").pop(),
                         items: [],
@@ -112,7 +119,7 @@ export async function init() {
                     };
                 }
 
-                folders[parentPath].items.push({
+                globals.folders[parentPath].items.push({
                     id: Date.now() + Math.random(),
                     name,
                     key,
@@ -128,14 +135,14 @@ export async function init() {
         const lastPath = JSON.parse(sessionStorage.getItem('lastPath') || '[]');
 
         if (lastView && Array.isArray(lastPath)) {
-            currentPath = lastPath;
+            globals.currentPath = lastPath;
             switchViewTo(lastView);
         } else {
-            currentPath = [`${userFolder}/fotos`];
+            globals.currentPath = [`${userFolder}/fotos`];
             switchViewTo('fotos');
         }
 
-        sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
+        sessionStorage.setItem('lastPath', JSON.stringify(globals.currentPath));
 
     } catch (error) {
         console.error("init()-Fehler:", error);
@@ -144,5 +151,6 @@ export async function init() {
             : error.message;
         UIkit.notification({ message: msg, status: 'danger' });
     }
-    console.log("FOLDER KEYS:", Object.keys(folders));
+
+    console.log("FOLDER KEYS:", Object.keys(globals.folders));
 }

@@ -1,3 +1,4 @@
+import { globals } from './globals.js';
 import { init } from './init.js';
 import {
     handleLogout,
@@ -11,16 +12,11 @@ import {
     handleRename,
     confirmDelete
 } from './folders.js';
-
-window.currentPath = window.currentPath || [];
-window.folders = window.folders || {};
-
-let activeView = 'fotos';
-let viewMode = 'grid';
+import { isMediaFile, createFileCard } from './media.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#viewTabs li').forEach(li => {
-        li.addEventListener('click', (e) => {
+        li.addEventListener('click', e => {
             e.preventDefault();
             const view = li.dataset.view;
             if (view) switchViewTo(view);
@@ -42,9 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('breadcrumb')?.addEventListener('click', e => {
         if (e.target.tagName === 'A') {
             e.preventDefault();
-            const idx = Array.from(e.target.parentElement.parentElement.children)
-                .indexOf(e.target.parentElement);
-            navigateToPath(currentPath.slice(0, idx + 1));
+            const idx = Array.from(e.target.parentElement.parentElement.children).indexOf(e.target.parentElement);
+            navigateToPath(globals.currentPath.slice(0, idx + 1));
         }
     });
 
@@ -55,21 +50,11 @@ export function switchViewTo(view) {
     const userFolder = getUserFolderTrimmed();
     if (!userFolder) return;
 
-    if (view !== activeView) {
-        if (view === 'fotos') {
-            currentPath = [`${userFolder}/fotos`];
-        } else if (view === 'alben') {
-            currentPath = [`${userFolder}/alben`];
-        } else if (view === 'dateien') {
-            currentPath = [`${userFolder}/dateien`];
-        } else if (view === 'sync') {
-            currentPath = [`${userFolder}/sync`];
-        } else {
-            currentPath = [];
-        }
+    if (view !== globals.activeView) {
+        globals.currentPath = [`${userFolder}/${view}`];
     }
 
-    activeView = view;
+    globals.activeView = view;
 
     document.querySelectorAll('#viewTabs li').forEach(li =>
         li.classList.toggle('uk-active', li.dataset.view === view)
@@ -81,13 +66,13 @@ export function switchViewTo(view) {
     const fabAlben = document.getElementById('fabAlben');
     const fabDateien = document.getElementById('fabDateien');
 
-    const isInAlbumRoot = view === 'alben' && currentPath.length === 1;
-    const isInAlbumFolder = view === 'alben' && currentPath.length > 1;
+    const isInAlbumRoot = view === 'alben' && globals.currentPath.length === 1;
+    const isInAlbumFolder = view === 'alben' && globals.currentPath.length > 1;
 
     if (heading) {
         heading.textContent =
             view === 'fotos' ? 'Fotos' :
-                isInAlbumFolder ? `Alben / ${currentPath.at(-1).split('/').pop()}` :
+                isInAlbumFolder ? `Alben / ${globals.currentPath.at(-1).split('/').pop()}` :
                     view === 'alben' ? 'Alben' :
                         view === 'dateien' ? 'Dateien' : '';
     }
@@ -100,20 +85,16 @@ export function switchViewTo(view) {
 
     document.getElementById('breadcrumb')?.style.setProperty(
         'display',
-        view === 'alben' && currentPath.length > 1 ? 'block' : 'none'
+        view === 'alben' && globals.currentPath.length > 1 ? 'block' : 'none'
     );
 
     sessionStorage.setItem('lastView', view);
-    sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
+    sessionStorage.setItem('lastPath', JSON.stringify(globals.currentPath));
 
     if (view === 'fotos') {
         renderFotos();
     } else if (view === 'alben') {
-        if (isInAlbumRoot) {
-            renderContent();
-        } else {
-            renderFotos();
-        }
+        isInAlbumRoot ? renderContent() : renderFotos();
     } else if (view === 'dateien') {
         renderDateien();
     } else if (view === 'sync') {
@@ -125,13 +106,15 @@ function renderFotos() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const path = currentPath.join('/');
-    if (!folders[path]) {
+    const path = globals.currentPath.join('/');
+    const folder = globals.folders[path];
+
+    if (!folder) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
         return;
     }
 
-    const fotos = folders[path].items?.filter(i => isMediaFile(i.name)) || [];
+    const fotos = folder.items?.filter(i => isMediaFile(i.name)) || [];
     fotos.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const container = document.createElement('div');
@@ -153,20 +136,19 @@ function renderDateien() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const path = currentPath.join('/');
+    const path = globals.currentPath.join('/');
+    const folder = globals.folders[path];
 
-    if (!folders[path]) {
+    if (!folder) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
         grid.innerHTML = `
-            <div class="uk-alert uk-alert-warning" uk-alert>
-                <p>Keine Dateien vorhanden.</p>
-            </div>
-        `;
+      <div class="uk-alert uk-alert-warning" uk-alert>
+        <p>Keine Dateien vorhanden.</p>
+      </div>`;
         return;
     }
 
-    const data = folders[path];
-    const files = data.items.filter(i => !isMediaFile(i.name));
+    const files = folder.items.filter(i => !isMediaFile(i.name));
     files.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const container = document.createElement('div');
@@ -174,9 +156,9 @@ function renderDateien() {
     container.setAttribute('uk-grid', '');
 
     files.forEach(file => {
-        const cardWrapper = document.createElement('div');
-        cardWrapper.appendChild(createFileCard(file));
-        container.appendChild(cardWrapper);
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(createFileCard(file));
+        container.appendChild(wrapper);
     });
 
     grid.innerHTML = '';
@@ -188,16 +170,15 @@ function renderContent() {
     const grid = document.getElementById('contentGrid');
     showLoading(grid);
 
-    const path = currentPath.join('/');
-    const data = folders[path];
+    const path = globals.currentPath.join('/');
+    const data = globals.folders[path];
 
     if (!data) {
         UIkit.notification({ message: `Pfad "${path}" nicht gefunden`, status: 'danger' });
         grid.innerHTML = `
-        <div class="uk-alert uk-alert-warning" uk-alert>
-            <p>Kein Inhalt gefunden.</p>
-        </div>
-    `;
+      <div class="uk-alert uk-alert-warning" uk-alert>
+        <p>Kein Inhalt gefunden.</p>
+      </div>`;
         return;
     }
 
@@ -207,45 +188,41 @@ function renderContent() {
 
     const frag = document.createDocumentFragment();
 
-    if (data.subfolders.length) {
-        data.subfolders.sort((a, b) => {
-            const dA = new Date(folders[a].items?.[0]?.date || '1970-01-01');
-            const dB = new Date(folders[b].items?.[0]?.date || '1970-01-01');
-            return dB - dA;
-        });
+    data.subfolders.sort((a, b) => {
+        const dA = new Date(globals.folders[a].items?.[0]?.date || '1970-01-01');
+        const dB = new Date(globals.folders[b].items?.[0]?.date || '1970-01-01');
+        return dB - dA;
+    });
 
-        data.subfolders.forEach(n => frag.appendChild(createFolderCard(folders[n])));
-    }
-
+    data.subfolders.forEach(n => frag.appendChild(createFileCard(globals.folders[n])));
     container.appendChild(frag);
     grid.innerHTML = '';
     grid.appendChild(container);
     UIkit.update(grid);
-
     updateBreadcrumb();
-}
-
-function switchView(mode) {
-    viewMode = mode;
-    document.getElementById('gridViewBtn')?.classList.toggle('uk-button-primary', mode === 'grid');
-    document.getElementById('listViewBtn')?.classList.toggle('uk-button-primary', mode === 'list');
-    renderContent();
 }
 
 function updateBreadcrumb() {
     const bc = document.getElementById('breadcrumb');
     if (!bc) return;
 
-    bc.innerHTML = currentPath.map((p, i) => {
+    bc.innerHTML = globals.currentPath.map((p, i) => {
         const name = p.split('/').pop();
-        return i === currentPath.length - 1
+        return i === globals.currentPath.length - 1
             ? `<li><span>${name}</span></li>`
             : `<li><a href="#">${name}</a></li>`;
     }).join('');
 }
 
+function switchView(mode) {
+    globals.viewMode = mode;
+    document.getElementById('gridViewBtn')?.classList.toggle('uk-button-primary', mode === 'grid');
+    document.getElementById('listViewBtn')?.classList.toggle('uk-button-primary', mode === 'list');
+    renderContent();
+}
+
 function navigateToPath(path) {
-    currentPath = path;
+    globals.currentPath = path;
     switchViewTo('alben');
 }
 
@@ -261,21 +238,18 @@ function renderSyncView() {
 
     const wrapper = document.createElement('div');
     wrapper.className = 'uk-card uk-card-default uk-card-body';
-
     wrapper.innerHTML = `
-      <div class="uk-margin-bottom">
-        <label class="uk-form-label">Wähle einen lokalen Ordner (einmalig):</label>
-        <div class="uk-form-controls">
-          <input class="uk-input" type="file" id="syncFolderInput" webkitdirectory multiple />
-        </div>
+    <div class="uk-margin-bottom">
+      <label class="uk-form-label">Wähle einen lokalen Ordner (einmalig):</label>
+      <div class="uk-form-controls">
+        <input class="uk-input" type="file" id="syncFolderInput" webkitdirectory multiple />
       </div>
-
-      <button class="uk-button uk-button-primary uk-button-small" id="syncUploadBtn">
-        <span uk-icon="upload"></span><span class="uk-margin-small-left">Hochladen</span>
-      </button>
-
-      <div id="syncResult" class="uk-margin-top uk-text-muted uk-text-small"></div>
-    `;
+    </div>
+    <button class="uk-button uk-button-primary uk-button-small" id="syncUploadBtn">
+      <span uk-icon="upload"></span><span class="uk-margin-small-left">Hochladen</span>
+    </button>
+    <div id="syncResult" class="uk-margin-top uk-text-muted uk-text-small"></div>
+`;
 
     grid.appendChild(wrapper);
 
@@ -310,6 +284,7 @@ function renderSyncView() {
 
     renderSyncOverview();
 }
+
 function renderSyncOverview() {
     const grid = document.getElementById('contentGrid');
 
@@ -318,18 +293,17 @@ function renderSyncOverview() {
     container.setAttribute('uk-grid', '');
 
     const syncRoot = `${getUserFolderTrimmed()}/sync`;
-    const syncFolders = Object.keys(folders)
-        .filter(p => p.startsWith(syncRoot + '/') && folders[p].parent === syncRoot);
+    const syncFolders = Object.keys(globals.folders)
+        .filter(p => p.startsWith(syncRoot + '/') && globals.folders[p].parent === syncRoot);
 
     syncFolders.sort((a, b) => {
-        const dA = new Date(folders[a].items?.[0]?.date || '1970-01-01');
-        const dB = new Date(folders[b].items?.[0]?.date || '1970-01-01');
+        const dA = new Date(globals.folders[a].items?.[0]?.date || '1970-01-01');
+        const dB = new Date(globals.folders[b].items?.[0]?.date || '1970-01-01');
         return dB - dA;
     });
 
     const frag = document.createDocumentFragment();
-    syncFolders.forEach(p => frag.appendChild(createFolderCard(folders[p])));
-
+    syncFolders.forEach(p => frag.appendChild(createFileCard(globals.folders[p])));
     container.appendChild(frag);
     grid.appendChild(container);
 }

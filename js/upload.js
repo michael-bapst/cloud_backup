@@ -1,10 +1,14 @@
+import { globals } from './globals.js';
 import { getToken, getUserFolderTrimmed, API_BASE } from './helpers.js';
+import { init } from './init.js';
 
 const allowedImages = /\.(jpe?g|png|gif|bmp|webp)$/i;
 const allowedDocs = /\.(pdf|zip|docx?|xlsx?|txt|json)$/i;
 
 window.handleUpload = async function (e) {
     e.preventDefault();
+
+    const { currentPath, activeView, folders } = globals;
 
     const fileInput = document.querySelector('#uploadForm input[name="file"]');
     const files = fileInput.files;
