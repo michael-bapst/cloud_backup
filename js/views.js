@@ -233,6 +233,9 @@ function switchView(mode) {
 }
 
 function updateBreadcrumb() {
+    const bc = document.getElementById('breadcrumb');
+    if (!bc) return;
+
     bc.innerHTML = currentPath.map((p, i) => {
         const name = p.split('/').pop();
         return i === currentPath.length - 1
