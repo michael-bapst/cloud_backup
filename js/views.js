@@ -56,16 +56,19 @@ export function switchViewTo(view) {
 
     globals.activeView = view;
 
+    // Tabs markieren
     document.querySelectorAll('#viewTabs li').forEach(li =>
         li.classList.toggle('uk-active', li.dataset.view === view)
     );
 
+    // FABs sichtbar machen
     const heading = document.getElementById('viewHeading');
     const toggleGroup = document.getElementById('viewModeToggles');
     const fabFotos = document.getElementById('fabFotos');
     const fabAlben = document.getElementById('fabAlben');
     const fabDateien = document.getElementById('fabDateien');
 
+    // ❗️Nur EINMAL definieren:
     const isInAlbumRoot = view === 'alben' && globals.currentPath.length === 1;
     const isInAlbumFolder = view === 'alben' && globals.currentPath.length > 1;
 

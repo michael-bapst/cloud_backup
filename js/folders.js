@@ -5,9 +5,6 @@ import { switchViewTo } from './views.js';
 
 function createFolderCard(f) {
     const { folders } = globals;
-    const date = new Date().toLocaleDateString('de-DE');
-    const safeId = encodeURIComponent(f.id);
-
     const div = document.createElement('div');
     div.className = 'album-card';
 
@@ -15,8 +12,11 @@ function createFolderCard(f) {
     thumbnailWrapper.className = 'album-thumbnail';
     thumbnailWrapper.innerHTML = `<span uk-icon="icon: image; ratio: 2" class="album-placeholder-icon"></span>`;
 
+    const items = f.items?.length ? f.items : folders[f.id]?.items || [];
+    const dateStr = items.length ? new Date(items[0].date).toLocaleDateString('de-DE') : '–';
+
     const loadPreview = async () => {
-        let mediaItem = f.items?.find(i => isMediaFile(i.name));
+        let mediaItem = items.find(i => isMediaFile(i.name));
         if (!mediaItem && folders[f.id]?.items?.length) {
             mediaItem = folders[f.id].items.find(i => isMediaFile(i.name));
         }
@@ -41,26 +41,48 @@ function createFolderCard(f) {
 
     loadPreview();
 
-    div.innerHTML = `
-    <div class="album-card-inner" onclick="navigateToFolder('${f.id}')">
-        <div class="album-thumbnail"></div>
-        <div class="album-meta">
-            <div class="album-title">${f.name}</div>
-            <div class="album-sub">${date}</div>
-        </div>
-    </div>
-    <div class="album-actions">
-        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); editFolder('${f.id}', event)">
-            <span uk-icon="pencil"></span>
-        </button>
-        <button class="uk-button uk-button-default uk-button-small" onclick="event.stopPropagation(); deleteFolder('${f.id}', event)">
-            <span uk-icon="trash"></span>
-        </button>
-    </div>
+    const inner = document.createElement('div');
+    inner.className = 'album-card-inner';
+    inner.onclick = () => navigateToFolder(f.id);
+
+    const thumb = document.createElement('div');
+    thumb.className = 'album-thumbnail';
+    thumb.appendChild(thumbnailWrapper);
+
+    const meta = document.createElement('div');
+    meta.className = 'album-meta';
+    meta.innerHTML = `
+        <div class="album-title">${f.name}</div>
+        <div class="album-sub">${dateStr}</div>
     `;
 
-    const thumbContainer = div.querySelector('.album-thumbnail');
-    thumbContainer.replaceWith(thumbnailWrapper);
+    inner.appendChild(thumb);
+    inner.appendChild(meta);
+
+    const actions = document.createElement('div');
+    actions.className = 'album-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'uk-button uk-button-default uk-button-small';
+    editBtn.innerHTML = '<span uk-icon="pencil"></span>';
+    editBtn.onclick = (e) => {
+        e.stopPropagation();
+        editFolder(f.id, e);
+    };
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'uk-button uk-button-default uk-button-small';
+    deleteBtn.innerHTML = '<span uk-icon="trash"></span>';
+    deleteBtn.onclick = (e) => {
+        e.stopPropagation();
+        deleteFolder(f.id, e);
+    };
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
+    div.appendChild(inner);
+    div.appendChild(actions);
 
     return div;
 }
