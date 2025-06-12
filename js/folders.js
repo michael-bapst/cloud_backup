@@ -1,6 +1,7 @@
 import { globals } from './globals.js';
 import { getToken, getUserFolderTrimmed, API_BASE } from './helpers.js';
 import { getSignedFileUrl, isMediaFile } from './media.js';
+import { switchViewTo } from './views.js';
 
 function createFolderCard(f) {
     const { folders } = globals;
@@ -201,9 +202,7 @@ export async function confirmDelete() {
     UIkit.modal('#deleteModal').hide();
     UIkit.notification({ message: 'Ordner gelöscht', status: 'success' });
 
-    if (activeView === 'alben') renderContent();
-    else if (activeView === 'fotos') renderFotos();
-    else if (activeView === 'dateien') renderDateien();
+    switchViewTo(activeView);
 }
 
 export async function handleNewFolder(e) {
@@ -271,5 +270,5 @@ export async function handleNewFolder(e) {
 
     UIkit.modal('#newFolderModal').hide();
     input.value = '';
-    renderContent();
+    switchViewTo('alben');
 }

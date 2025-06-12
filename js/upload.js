@@ -1,6 +1,7 @@
 import { globals } from './globals.js';
 import { getToken, getUserFolderTrimmed, API_BASE } from './helpers.js';
 import { init } from './init.js';
+import { switchViewTo } from './views.js';
 
 const allowedImages = /\.(jpe?g|png|gif|bmp|webp)$/i;
 const allowedDocs = /\.(pdf|zip|docx?|xlsx?|txt|json)$/i;
@@ -89,5 +90,5 @@ window.handleUpload = async function (e) {
     sessionStorage.setItem('lastPath', JSON.stringify(currentPath));
 
     await init();
-    switchViewTo(activeView);
+    switchViewTo(globals.activeView);
 };
